@@ -1,0 +1,2 @@
+CPU密集型操作：多进程(multitasking)，使用多核
+IO密集型操作：多线程(threading)，使用单核，有GIL全局解释器锁
