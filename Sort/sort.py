@@ -10,18 +10,46 @@ __author__ = 'AC'
 #------------------import--------------------#
 ############################################## 
 import random
+import copy, time
 
 ##############################################
 #------------------常量定义------------------#
 ##############################################
 if __name__ == '__main__':
-	# 生成100个随机数
-	NumNumbers = 300
-	RandomNumbers = [random.uniform(0,10) for x in range(0,NumNumbers,1)]
+    # 生成100个随机数
+    NumNumbers = 3000
+    RandomNumbers = [random.uniform(0,10) for x in range(0,NumNumbers,1)]
 
 ##############################################
 #------------------函数定义------------------#
 ##############################################
+
+###################################
+# PrintNumList
+# 打印长数组
+###################################
+def PrintNumList(NumberList, len = 5):
+    for num in NumberList[0:len]:
+        print "%4.3f, " % num,
+    print "..., ",
+    for num in NumberList[-len:]:
+        print "%4.3f, " % num,
+    print "(min = %4.3f, max = %4.3f)" % (min(NumberList), max(NumberList))
+
+###################################
+# SortTest
+# 排序测试
+###################################
+def SortTest(cSort, NumberList, ResultFlag = True):
+    NumberListCopy = copy.copy(NumberList)
+    print "%s:\t" % cSort.__name__,
+    startTime = time.time()
+    cSort().Sort(NumberListCopy)
+    stopTime = time.time()
+    print ",\tTime Used: %6.3fs" % (stopTime - startTime)
+    if ResultFlag:
+        PrintNumList(NumberListCopy, len=2)
+        print ""
 
 
 ##############################################
@@ -33,245 +61,330 @@ if __name__ == '__main__':
 # sort类
 ################################### 
 class sort:
-	"""通用sort基类"""
-	###################################
-	# Variables
-	################################### 
-	__swapCount = 0
-	__searchCount = 0
+    """通用sort基类"""
+    ###################################
+    # Variables
+    ################################### 
+    __swapCount = 0
+    __searchCount = 0
 
-	###################################
-	# Swap
-	# 在List中交换两数
-	################################### 
-	def Swap(self, NumberList, i, j):
-		tmp = NumberList[i]
-		NumberList[i] = NumberList[j]
-		NumberList[j] = tmp
-		self.__swapCount += 1
-		return NumberList
+    ###################################
+    # Swap
+    # 在List中交换两数
+    ################################### 
+    def Swap(self, NumberList, i, j):
+        tmp = NumberList[i]
+        NumberList[i] = NumberList[j]
+        NumberList[j] = tmp
+        self.__swapCount += 1
+        return NumberList
 
-	###################################
-	# ClearCount
-	# 清除统计量
-	################################### 
-	def ClearCount(self):
-		self.__swapCount = 0
-		self.__searchCount = 0
+    ###################################
+    # ClearCount
+    # 清除统计量
+    ################################### 
+    def ClearCount(self):
+        self.__swapCount = 0
+        self.__searchCount = 0
 
-	###################################
-	# GetCount
-	# 获取统计值（打印）
-	################################### 
-	def GetCount(self):
-		print 'SwapCount = %d, SearchCount = %d' % (self.__swapCount, self.__searchCount)
+    ###################################
+    # GetCount
+    # 获取统计值（打印）
+    ################################### 
+    def GetCount(self):
+        print "SwapCount = %10d ,\tSearchCount = %10d" % (self.__swapCount, self.__searchCount),
 
-	###################################
-	# AddSearchCount
-	# 检索统计值加一
-	################################### 
-	def AddSearchCount(self):
-		self.__searchCount += 1
+    ###################################
+    # AddSearchCount
+    # 检索统计值加一
+    ################################### 
+    def AddSearchCount(self):
+        self.__searchCount += 1
 
-	###################################
-	# BubbleSort
-	# 检索统计值加一
-	################################### 
-	def AddSearchCount(self):
-		self.__searchCount += 1
+    ###################################
+    # BubbleSort
+    # 检索统计值加一
+    ################################### 
+    def AddSearchCount(self):
+        self.__searchCount += 1
 
-	###################################
-	# Sort
-	# 排序函数
-	################################### 
-	def Sort(self, NumberList):
-		self.ClearCount()
-		self.__Sort(NumberList)
-		self.GetCount()
-		return NumberList
+    ###################################
+    # Sort
+    # 排序函数
+    ################################### 
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList)
+        #self.GetCount()
+        return NumberList
 
-	###################################
-	# __Sort
-	# 排序函数(内部实现)(基类实现以冒泡法为例)
-	################################### 		
-	def __Sort(self, NumberList):
-		for i in range(0,len(NumberList)):
-			for j in range(0,len(NumberList)-1):
-				self.AddSearchCount()
-				if NumberList[j]>NumberList[j+1]:
-					self.Swap(NumberList,j,j+1)
-		return NumberList
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)(基类实现以冒泡法为例)
+    ###################################         
+    def __Sort(self, NumberList):
+        for i in range(0,len(NumberList)):
+            for j in range(0,len(NumberList)-1):
+                self.AddSearchCount()
+                if NumberList[j]>NumberList[j+1]:
+                    self.Swap(NumberList,j,j+1)
+        return NumberList
 
 ###################################
 # class BubbleSort (基类sort)
 # 冒泡排序，相邻两数，A>B则交换
 ################################### 
 class BubbleSort(sort):
-	"""冒泡排序，相邻两数，A>B则交换"""
+    """冒泡排序，相邻两数，A>B则交换"""
 
-	###################################
-	# Sort
-	# 排序函数
-	###################################
-	def Sort(self, NumberList):
-		self.ClearCount()
-		self.__Sort(NumberList)
-		self.GetCount()
-		return NumberList
+    ###################################
+    # Sort
+    # 排序函数
+    ###################################
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList)
+        self.GetCount()
+        return NumberList
 
-	###################################
-	# __Sort
-	# 排序函数(内部实现)
-	################################### 		
-	def __Sort(self, NumberList):
-		for i in range(0,len(NumberList)):
-			for j in range(0,len(NumberList)-1):
-				self.AddSearchCount()
-				if NumberList[j]>NumberList[j+1]:
-					self.Swap(NumberList,j,j+1)
-		return NumberList
-
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)
+    ###################################         
+    def __Sort(self, NumberList):
+        for i in range(0,len(NumberList)):
+            for j in range(0,len(NumberList)-1):
+                self.AddSearchCount()
+                if NumberList[j]>NumberList[j+1]:
+                    self.Swap(NumberList,j,j+1)
+        return NumberList
 
 ###################################
 # class SelectSort (基类sort)
 # 选择排序，依次找到最小值并交换
 ################################### 
 class SelectSort(sort):
-	"""选择排序，依次找到最小值并交换"""
+    """选择排序，依次找到最小值并交换"""
 
-	###################################
-	# Sort
-	# 排序函数
-	###################################
-	def Sort(self, NumberList):
-		self.ClearCount()
-		self.__Sort(NumberList)
-		self.GetCount()
-		return NumberList
-	###################################
-	# __Sort
-	# 排序函数(内部实现)
-	################################### 		
-	def __Sort(self, NumberList):
-		for i in range(0,len(NumberList)-1):
-			minIdx = i
-			for j in range(i+1,len(NumberList)):
-				self.AddSearchCount()
-				if NumberList[j]<NumberList[minIdx]:
-					minIdx = j
-			if minIdx != 1:
-				self.Swap(NumberList,minIdx,i)
-		return NumberList
+    ###################################
+    # Sort
+    # 排序函数
+    ###################################
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList)
+        self.GetCount()
+        return NumberList
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)
+    ###################################         
+    def __Sort(self, NumberList):
+        for i in range(0,len(NumberList)-1):
+            minIdx = i
+            for j in range(i+1,len(NumberList)):
+                self.AddSearchCount()
+                if NumberList[j]<NumberList[minIdx]:
+                    minIdx = j
+            if minIdx != i:
+                self.Swap(NumberList,minIdx,i)
+        return NumberList
 
 ###################################
 # class InsertSort (基类sort)
 # 插入排序，从第二个开始找啊到的第一个比自己小的值插在后面
 ################################### 
 class InsertSort(sort):
-	"""插入排序，从第二个开始找啊到的第一个比自己小的值插在后面"""
+    """插入排序，从第二个开始找啊到的第一个比自己小的值插在后面"""
 
-	###################################
-	# Sort
-	# 排序函数
-	###################################
-	def Sort(self, NumberList):
-		self.ClearCount()
-		self.__Sort(NumberList)
-		self.GetCount()
-		return NumberList
+    ###################################
+    # Sort
+    # 排序函数
+    ###################################
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList)
+        self.GetCount()
+        return NumberList
 
 
-	###################################
-	# __Sort
-	# 排序函数(内部实现)
-	################################### 		
-	def __Sort(self, NumberList):
-		for i in range(1,len(NumberList)):
-			target = NumberList[i]
-			j = i
-			while (j > 0 and target < NumberList[j-1]):
-				self.AddSearchCount()
-				NumberList[j] = NumberList[j-1]
-				j -= 1
-			NumberList[j] = target
-		return NumberList
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)
+    ###################################         
+    def __Sort(self, NumberList):
+        for i in range(1,len(NumberList)):
+            target = NumberList[i]
+            j = i
+            while (j > 0 and target < NumberList[j-1]):
+                self.AddSearchCount()
+                NumberList[j] = NumberList[j-1]
+                j -= 1
+            else:
+                # 没有进入循环也检索了一次
+                self.AddSearchCount()
+            NumberList[j] = target
+        return NumberList
 
 ###################################
 # class QuickSort (基类sort)
 # 快速排序（二分分治，将一个数组按照一个基准数分割，比基准数大的放基准数的右边，小的放左边。）
 ################################### 
 class QuickSort(sort):
-	"""快速排序（二分分治，将一个数组按照一个基准数分割，比基准数大的放基准数的右边，小的放左边。）"""
+    """快速排序（二分分治，将一个数组按照一个基准数分割，比基准数大的放基准数的右边，小的放左边。）"""
 
-	###################################
-	# Sort
-	# 排序函数
-	################################### 
-	def Sort(self, NumberList):
-		self.ClearCount()
-		self.__Sort(NumberList, 0, len(NumberList)-1)
-		self.GetCount()
-		return NumberList
+    ###################################
+    # Sort
+    # 排序函数
+    ################################### 
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList, 0, len(NumberList)-1)
+        self.GetCount()
+        return NumberList
 
-	###################################
-	# __Sort
-	# 排序函数(内部实现)
-	################################### 		
-	def __Sort(self, NumberList, left, right):
-		if (left >= right):
-			# 递归的终止条件
-			return NumberList
-		pivotIndex = self.__SortPartition(NumberList, left, right) # first time ( pivotIndex位置数字确定不再排序 )
-		self.__Sort(NumberList, left, pivotIndex-1) # ( 左右分别再次排序 )
-		self.__Sort(NumberList, pivotIndex+1, right)
-		return NumberList
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)
+    ###################################         
+    def __Sort(self, NumberList, left, right):
+        if (left >= right):
+            # 递归的终止条件
+            return NumberList
+        pivotIndex = self.__SortPartition(NumberList, left, right) # first time ( pivotIndex位置数字确定不再排序 )
+        self.__Sort(NumberList, left, pivotIndex-1) # ( 左右分别再次排序 )
+        self.__Sort(NumberList, pivotIndex+1, right)
+        return NumberList
 
-	def __SortPartition(self, NumberList, left, right):
-		# pivot: 中心点
-		pivot = NumberList[left]
-		pivotIndex = left
+    def __SortPartition(self, NumberList, left, right):
+        # pivot: 中心点
+        pivot = NumberList[left]
+        pivotIndex = left
 
-		while (left < right):
-			while (left < right and NumberList[right] >= pivot):
-				self.AddSearchCount()
-				right -= 1
-			# self.Swap(NumberList, left, right)
-			while (left < right and NumberList[left] <= pivot):
-				self.AddSearchCount()
-				left += 1
-			self.Swap(NumberList, left, right)			
-		self.Swap(NumberList, pivotIndex, left) # improve
-		return left
+        while (left < right):
+            while (left < right and NumberList[right] >= pivot):
+                self.AddSearchCount()
+                right -= 1
+            # self.Swap(NumberList, left, right)
+            while (left < right and NumberList[left] <= pivot):
+                self.AddSearchCount()
+                left += 1
+            self.Swap(NumberList, left, right)            
+        self.Swap(NumberList, pivotIndex, left) # improve
+        return left
 
+###################################
+# class ShellSort (基类sort)
+# 希尔排序(Shell Sort)是插入排序的一种。也称缩小增量排序，是直接插入排序算法的一种更高效的改进版本。
+###################################
+class ShellSort(sort):
+    """ -- 以下内容出自百度文库
+    希尔排序(Shell Sort)是插入排序的一种。也称缩小增量排序，是直接插入排序算法的一种更高效的改进版本。
+    希尔排序是非稳定排序算法。该方法因DL．Shell于1959年提出而得名。
+    希尔排序是把记录按下标的一定增量分组，对每组使用直接插入排序算法排序；
+    随着增量逐渐减少，每组包含的关键词越来越多，当增量减至1时，整个文件恰被分成一组，算法便终止。
+    """
+
+    ###################################
+    # Sort
+    # 排序函数
+    ###################################
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList)
+        self.GetCount()
+        return NumberList
+
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)
+    ###################################
+    def __Sort(self, NumberList):
+        NumLen = len(NumberList)
+        step = NumLen # 间距初始值
+        while (step >= 1):
+            step = step // 2
+            for i in range(0, step):
+                # 分组
+                grp = range(i, NumLen, step)
+                # 以下同插入排序
+                for idx1 in range(1, len(grp)):
+                    target = NumberList[grp[idx1]]
+                    idx2 = idx1
+                    while(idx2 > 0 and target < NumberList[grp[idx2 - 1]]):
+                        self.AddSearchCount()
+                        NumberList[grp[idx2]] = NumberList[grp[idx2 - 1]]
+                        idx2 -= 1
+                    else:
+                        # 没有进入循环也检索了一次
+                        self.AddSearchCount()
+                    NumberList[grp[idx2]] = target
+        return NumberList
+
+###################################
+# class MergeSort (基类sort)
+# 归并排序（Merge Sort）是建立在归并操作上的一种有效的排序算法，该算法是采用分治法（Divide and Conquer）的一个非常典型的应用。
+###################################
+class MergeSort(sort):
+    """ -- 以下内容出自百度文库
+    归并排序（MERGE-SORT）是建立在归并操作上的一种有效的排序算法，
+    该算法是采用分治法（Divide and Conquer）的一个非常典型的应用。
+    将已有序的子序列合并，得到完全有序的序列；即先使每个子序列有序，
+    再使子序列段间有序。若将两个有序表合并成一个有序表，称为二路归并。
+    """
+
+    ###################################
+    # Sort
+    # 排序函数
+    ###################################
+    def Sort(self, NumberList):
+        self.ClearCount()
+        self.__Sort(NumberList, 0, len(NumberList))
+        self.GetCount()
+        return NumberList
+
+    ###################################
+    # __Sort
+    # 排序函数(内部实现)
+    ###################################
+    def __Sort(self, NumberList, left, right):
+        if (right - left <= 1):
+            # 递归的终止条件
+            return NumberList
+        middle = (left + right) // 2
+        self.__Sort(NumberList, left, middle)
+        self.__Sort(NumberList, middle, right)
+        self.__Merge(NumberList, left, middle, right)
+
+    def __Merge(self, NumberList, left, middle, right):
+        '''数组的两部分Merge
+        [left:middle] 与 [middle:right] merge
+        '''
+        NumberListMerged = []
+        idxL, idxR = left, middle
+        while(idxL < middle and idxR < right):
+            self.AddSearchCount()
+            if (NumberList[idxL] < NumberList[idxR]):
+                NumberListMerged.append(NumberList[idxL])
+                idxL += 1
+            else:
+                NumberListMerged.append(NumberList[idxR])
+                idxR += 1
+        self.AddSearchCount()
+        # 剩余部分
+        if(idxL < middle):
+            NumberListMerged += NumberList[idxL:middle]
+        else:
+            NumberListMerged += NumberList[idxR:right]
+        NumberList[left:right] = NumberListMerged
+        return NumberList
 
 ##############################################
 #------------------脚本开始------------------#
 ##############################################
 if __name__ == '__main__':
-	# 主线程
-	print RandomNumbers
-	# BubbleSort
-	RandNum = list(RandomNumbers)
-	cSort = BubbleSort()
-	print 'BubbleSort: ',
-	print cSort.Sort(RandNum)
-
-	# SelectSort
-	RandNum = list(RandomNumbers)
-	cSort = SelectSort()
-	print 'SelectSort: ',
-	print cSort.Sort(RandNum)
-
-	# InsertSort
-	RandNum = list(RandomNumbers)
-	cSort = InsertSort()
-	print 'InsertSort: ',
-	print cSort.Sort(RandNum)
-
-	# QuickSort
-	RandNum = list(RandomNumbers)
-	cSort = QuickSort()
-	print 'QuickSort: ',
-	print cSort.Sort(RandNum)
-
-
+    # 主线程
+    PrintNumList(RandomNumbers)
+    SortList = [BubbleSort,SelectSort,InsertSort,QuickSort,ShellSort,MergeSort]
+    for cSort in SortList:
+        SortTest(cSort, RandomNumbers, ResultFlag=True)
