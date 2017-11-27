@@ -37,14 +37,14 @@ def PrintNumList(NumberList, len = 5):
     print "(min = %4.3f, max = %4.3f)" % (min(NumberList), max(NumberList))
 
 ###################################
-# SortTest
+# SortTestAll
 # 排序测试
 ###################################
-def SortTest(cSort, NumberList, ResultFlag = True):
+def SortTestAll(cSort, NumberList, ResultFlag = True):
     NumberListCopy = copy.copy(NumberList)
     print "%s:\t" % cSort.__name__,
     startTime = time.time()
-    cSort().Sort(NumberListCopy)
+    cSort().SortTest(NumberListCopy)
     stopTime = time.time()
     print ",\tTime Used: %6.3fs" % (stopTime - startTime)
     if ResultFlag:
@@ -109,25 +109,21 @@ class sort:
         self.__searchCount += 1
 
     ###################################
-    # Sort
+    # SortTest
     # 排序函数
     ################################### 
-    def Sort(self, NumberList):
+    def SortTest(self, NumberList):
         self.ClearCount()
-        self.__Sort(NumberList)
-        #self.GetCount()
+        self.Sort(NumberList)
+        self.GetCount()
         return NumberList
 
     ###################################
-    # __Sort
-    # 排序函数(内部实现)(基类实现以冒泡法为例)
+    # Sort
+    # 排序函数(内部实现)(Python自带排序)
     ###################################         
-    def __Sort(self, NumberList):
-        for i in range(0,len(NumberList)):
-            for j in range(0,len(NumberList)-1):
-                self.AddSearchCount()
-                if NumberList[j]>NumberList[j+1]:
-                    self.Swap(NumberList,j,j+1)
+    def Sort(self, NumberList):
+        NumberList.sort()
         return NumberList
 
 ###################################
@@ -139,19 +135,9 @@ class BubbleSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
-    ###################################
-    def Sort(self, NumberList):
-        self.ClearCount()
-        self.__Sort(NumberList)
-        self.GetCount()
-        return NumberList
-
-    ###################################
-    # __Sort
     # 排序函数(内部实现)
     ###################################         
-    def __Sort(self, NumberList):
+    def Sort(self, NumberList):
         for i in range(0,len(NumberList)):
             for j in range(0,len(NumberList)-1):
                 self.AddSearchCount()
@@ -168,18 +154,9 @@ class SelectSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
-    ###################################
-    def Sort(self, NumberList):
-        self.ClearCount()
-        self.__Sort(NumberList)
-        self.GetCount()
-        return NumberList
-    ###################################
-    # __Sort
     # 排序函数(内部实现)
     ###################################         
-    def __Sort(self, NumberList):
+    def Sort(self, NumberList):
         for i in range(0,len(NumberList)-1):
             minIdx = i
             for j in range(i+1,len(NumberList)):
@@ -199,20 +176,9 @@ class InsertSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
-    ###################################
-    def Sort(self, NumberList):
-        self.ClearCount()
-        self.__Sort(NumberList)
-        self.GetCount()
-        return NumberList
-
-
-    ###################################
-    # __Sort
     # 排序函数(内部实现)
     ###################################         
-    def __Sort(self, NumberList):
+    def Sort(self, NumberList):
         for i in range(1,len(NumberList)):
             target = NumberList[i]
             j = i
@@ -235,17 +201,15 @@ class QuickSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
+    # 排序函数(内部实现)
     ################################### 
     def Sort(self, NumberList):
-        self.ClearCount()
         self.__Sort(NumberList, 0, len(NumberList)-1)
-        self.GetCount()
         return NumberList
 
     ###################################
     # __Sort
-    # 排序函数(内部实现)
+    # 排序函数（递归）
     ###################################         
     def __Sort(self, NumberList, left, right):
         if (left >= right):
@@ -287,19 +251,9 @@ class ShellSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
-    ###################################
-    def Sort(self, NumberList):
-        self.ClearCount()
-        self.__Sort(NumberList)
-        self.GetCount()
-        return NumberList
-
-    ###################################
-    # __Sort
     # 排序函数(内部实现)
     ###################################
-    def __Sort(self, NumberList):
+    def Sort(self, NumberList):
         NumLen = len(NumberList)
         step = NumLen # 间距初始值
         while (step >= 1):
@@ -335,17 +289,15 @@ class MergeSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
+    # 排序函数(内部实现)
     ###################################
     def Sort(self, NumberList):
-        self.ClearCount()
         self.__Sort(NumberList, 0, len(NumberList))
-        self.GetCount()
         return NumberList
 
     ###################################
     # __Sort
-    # 排序函数(内部实现)
+    # 排序函数（递归）
     ###################################
     def __Sort(self, NumberList, left, right):
         if (right - left <= 1):
@@ -394,19 +346,9 @@ class HeapSort(sort):
 
     ###################################
     # Sort
-    # 排序函数
-    ###################################
-    def Sort(self, NumberList):
-        self.ClearCount()
-        self.__Sort(NumberList)
-        self.GetCount()
-        return NumberList
-
-    ###################################
-    # __Sort
     # 排序函数(内部实现)
     ###################################
-    def __Sort(self, NumberList):
+    def Sort(self, NumberList):
         NumLen = len(NumberList)
         for Stop in range(NumLen-1, 0, -1):
             self.__BuildHeap(NumberList, 0, Stop)
@@ -441,8 +383,7 @@ class HeapSort(sort):
 ##############################################
 if __name__ == '__main__':
     # 主线程
-    #SortTest(HeapSort, [1,3,4,5,2,6,9,7,8,0])
     PrintNumList(RandomNumbers)
     SortList = [BubbleSort,SelectSort,InsertSort,QuickSort,ShellSort,MergeSort,HeapSort]
     for cSort in SortList:
-        SortTest(cSort, RandomNumbers, ResultFlag=True)
+        SortTestAll(cSort, RandomNumbers, ResultFlag=True)
