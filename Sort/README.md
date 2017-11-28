@@ -1,6 +1,11 @@
 # Sort
 各种排序算法
 
+## 2017-11-28
+更新类中测试接口GetCount，SortTest
+更新测试函数SortTestAll
+增加通过jupyter notebook的分析
+
 ## 2017-11-27
 简化类定义
 

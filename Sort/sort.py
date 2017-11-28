@@ -40,16 +40,20 @@ def PrintNumList(NumberList, len = 5):
 # SortTestAll
 # 排序测试
 ###################################
-def SortTestAll(cSort, NumberList, ResultFlag = True):
+def SortTestAll(cSort, NumberList, PrintFlag = True):
     NumberListCopy = copy.copy(NumberList)
-    print "%s:\t" % cSort.__name__,
     startTime = time.time()
-    cSort().SortTest(NumberListCopy)
+    result = cSort().SortTest(NumberListCopy)
     stopTime = time.time()
-    print ",\tTime Used: %6.3fs" % (stopTime - startTime)
-    if ResultFlag:
+    result["Time"] = stopTime - startTime
+    if PrintFlag:
+        print "%s:\t" % cSort.__name__,
+        print "SwapCount = %10d ,\tSearchCount = %10d,\tTime Used: %6.3fs" \
+              % (result["Swap"], result["Search"],result["Time"])
         PrintNumList(NumberListCopy, len=2)
         print ""
+
+    return result
 
 
 ##############################################
@@ -92,7 +96,8 @@ class sort:
     # 获取统计值（打印）
     ################################### 
     def GetCount(self):
-        print "SwapCount = %10d ,\tSearchCount = %10d" % (self.__swapCount, self.__searchCount),
+        # print "SwapCount = %10d ,\tSearchCount = %10d" % (self.__swapCount, self.__searchCount),
+        return {"Swap":self.__swapCount, "Search":self.__searchCount}
 
     ###################################
     # AddSearchCount
@@ -115,8 +120,7 @@ class sort:
     def SortTest(self, NumberList):
         self.ClearCount()
         self.Sort(NumberList)
-        self.GetCount()
-        return NumberList
+        return self.GetCount()
 
     ###################################
     # Sort
@@ -386,4 +390,4 @@ if __name__ == '__main__':
     PrintNumList(RandomNumbers)
     SortList = [BubbleSort,SelectSort,InsertSort,QuickSort,ShellSort,MergeSort,HeapSort]
     for cSort in SortList:
-        SortTestAll(cSort, RandomNumbers, ResultFlag=True)
+        SortTestAll(cSort, RandomNumbers, PrintFlag=True)
