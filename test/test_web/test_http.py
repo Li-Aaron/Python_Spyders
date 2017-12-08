@@ -31,9 +31,18 @@ import socket
 ##############################################
 
 ###################################
-# class
-# 类
+# class RedirectHandler
+# 重定向自定义类
 ################################### 
+class RedirectHandler(urllib2.HTTPRedirectHandler):
+    def http_error_301(self, req, fp, code, msg, headers):
+        pass
+
+    def http_error_302(self, req, fp, code, msg, headers):
+        result = urllib2.HTTPRedirectHandler.http_error_301(self, req, fp, code, msg, headers)
+        result.status = code
+        result.newurl = result.geturl()
+        return result
 
 ##############################################
 #------------------脚本开始------------------#
@@ -47,6 +56,7 @@ if __name__ == '__main__':
     socket.setdefaulttimeout(10)
     urllib2.socket.setdefaulttimeout(10)
 
+    # Http Respond Code
     request = urllib2.Request(url)
     try:
         response = urllib2.urlopen(request, timeout=5)
@@ -63,3 +73,16 @@ if __name__ == '__main__':
         print response.getcode()
         # print html
 
+    # Http Redirect
+    url = "http://www.baidu.com/sososo"
+    response = urllib2.urlopen(url)
+    isRedirected = response.geturl() == url
+    print isRedirected
+    print response.geturl()
+
+    opener = urllib2.build_opener(RedirectHandler)
+    response = opener.open(url)
+    print response.geturl()
+    # print response.headers
+    # retdata = response.read()
+    # print retdata
