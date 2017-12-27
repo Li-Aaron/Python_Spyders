@@ -49,22 +49,29 @@ class NovelDownloader(object):
         user_agent = "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)"
         req = urllib2.Request(url)
         req.add_header('User-Agent', user_agent)
-        response = urllib2.urlopen(req)
-        html = response.read()
+        html = ''
+        timeoutCount = 5
+        while not html:
+            try:
+                response = urllib2.urlopen(req, timeout=20)
+                html = response.read()
+            except urllib2.URLError:
+                if not timeoutCount:
+                    raise urllib2.URLError('Timeout Failure')
+                print '[Error] Time out retry %s' % url
+                timeoutCount -= 1
         return html
 
-    def SaveToFile(self, filename, text, attr='w'):
+    def SaveToFile(self, text, attr='w'):
         '''
         Save a string to a file
         :param filename:
         :param text: string
         :return: None
         '''
-        if not isinstance(filename, (str, unicode)):
-            raise TypeError
         if not isinstance(text, (str, unicode)):
             raise TypeError
-        with open(filename, attr) as f:
+        with open(self.fileName, attr) as f:
             f.write(text)
 
     def RemoveBr(self, string):
@@ -77,7 +84,7 @@ class NovelDownloader(object):
         ret = re.sub(u'<br/>', EOL, string)
         ret = re.sub(u'<br>', EOL, ret)
         ret = re.sub(u'\r', EOL, ret)
-        ret = re.sub(u'[  \t　]+', u'', ret)
+        ret = re.sub(u'[  \t　]{2,}', u'', ret)
         ret = re.sub(u'\n{2,}', EOL, ret)
         return ret
 
@@ -154,6 +161,19 @@ class NovelDownloader(object):
     def NovelUrlComb(self, novelUrl):
         return self.webPageUrl + novelUrl
 
+    def SaveNovelTitle(self):
+        '''
+        Save Novel Title To File
+        :return:
+        '''
+        novelTxt = self.novel['Title'] + EOL
+        novelTxt += self.novel['Author'] + EOL
+        novelTxt += self.novel['Abstract'] + EOL
+        novelTxt = self.RemoveBr(novelTxt)
+        novelTxt = novelTxt.encode('utf-8')
+        novelTxt += self.webPageUrl + EOL.encode('utf-8') + EOL.encode('utf-8')
+        self.SaveToFile(novelTxt)
+
     def GetNovel(self, startChap = 0):
         '''
         DownLoad Text Start
@@ -162,14 +182,7 @@ class NovelDownloader(object):
         self.GetNovelList()
         print self.novel['Title']
         # get novel
-        novelTxt = self.novel['Title'] + EOL
-        novelTxt += self.novel['Author'] + EOL
-        novelTxt += self.novel['Abstract'] + EOL
-        novelTxt = self.RemoveBr(novelTxt)
-        novelTxt = novelTxt.encode('utf-8')
-        novelTxt += self.webPageUrl + EOL.encode('utf-8') + EOL.encode('utf-8')
-
-        self.SaveToFile(self.fileName, novelTxt)
+        self.SaveNovelTitle()
 
         numIdx = startChap
         numChapter = len(self.novel['UrlList'])
@@ -178,7 +191,7 @@ class NovelDownloader(object):
             print "[%4.3f%%] %5d of %5d is done ..." % (100.0 * numIdx / numChapter, numIdx, numChapter)
             textUrl = self.NovelUrlComb(novelUrl)
             chapterText = self.GetNovelTextFromUrl(textUrl).encode('utf-8')
-            self.SaveToFile(self.fileName, chapterText, attr='a+')
+            self.SaveToFile(chapterText, attr='a+')
 
         print '[Process Done]'
 
@@ -187,9 +200,10 @@ class NovelDownloader(object):
 ##############################################
 if __name__ == '__main__':
     # argv check
+    webPageUrl = URL
+    startChap = 0
     if len(sys.argv) < 2:
         print 'For debug usage!'
-        webPageUrl = URL
     elif len(sys.argv) == 2:
         webPageUrl = str(sys.argv[1])
     elif len(sys.argv) == 3:

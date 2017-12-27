@@ -14,12 +14,14 @@ from bs4 import BeautifulSoup
 import re
 import sys
 from NovelDownloader import NovelDownloader
+from NovelDownloaderMulti import NovelDownloaderMulti
 
 ##############################################
 #------------------常量定义------------------#
 ##############################################
 # URL = 'http://www.quyuege.com/xs/43/43176/'
-URL = 'https://www.23us.la/html/116/116108/'
+URL = 'https://www.23us.la/html/247/247068/'
+# URL = 'https://www.23us.la/html/151/151769/'
 EOL = u'\n'
 
 ##############################################
@@ -66,7 +68,7 @@ class NovelDownloader23us(NovelDownloader):
         novelTitle = soup.find_all('div', class_="inner", id="BookCon")[0]
         title = novelTitle.find_all('h1')[0].string
         # find novel text
-        matchObj = re.search(u'<div id="content">\s*(.*?)</div>', unicode(novelTitle), re.M | re.S)
+        matchObj = re.search(u'<div id="content".*?>\s*(.*?)</div>', unicode(novelTitle), re.M | re.S)
         if not matchObj:
             text = ''
         else:
@@ -76,15 +78,21 @@ class NovelDownloader23us(NovelDownloader):
     def NovelUrlComb(self, novelUrl):
         return self.rootUrl + novelUrl
 
+class NovelDownloader23usMulti(NovelDownloaderMulti,NovelDownloader23us):
+    pass
+
+
+
+
 ##############################################
 #------------------脚本开始------------------#
 ##############################################
 if __name__ == '__main__':
     # argv check
+    webPageUrl = URL
+    startChap = 0
     if len(sys.argv) < 2:
         print 'For debug usage!'
-        webPageUrl = URL
-        startChap = 473
     elif len(sys.argv) == 2:
         webPageUrl = str(sys.argv[1])
     elif len(sys.argv) == 3:
@@ -93,5 +101,6 @@ if __name__ == '__main__':
     else:
         raise Exception("too many input parameters (>2)")
 
-    novelDL = NovelDownloader23us(webPageUrl)
+    # novelDL = NovelDownloader23us(webPageUrl)
+    novelDL = NovelDownloader23usMulti(webPageUrl)
     novelDL.GetNovel(startChap)
