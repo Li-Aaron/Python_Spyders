@@ -15,6 +15,7 @@ import re
 import sys
 from NovelDownloader import NovelDownloader
 from NovelDownloaderMulti import NovelDownloaderMulti
+from NovelDownloaderGev import NovelDownloaderGev
 
 ##############################################
 #------------------常量定义------------------#
@@ -81,7 +82,8 @@ class NovelDownloader23us(NovelDownloader):
 class NovelDownloader23usMulti(NovelDownloaderMulti,NovelDownloader23us):
     pass
 
-
+class NovelDownloader23usGev(NovelDownloaderGev,NovelDownloader23us):
+    pass
 
 
 ##############################################
@@ -102,5 +104,5 @@ if __name__ == '__main__':
         raise Exception("too many input parameters (>2)")
 
     # novelDL = NovelDownloader23us(webPageUrl)
-    novelDL = NovelDownloader23usMulti(webPageUrl)
+    novelDL = NovelDownloader23usGev(webPageUrl)
     novelDL.GetNovel(startChap)
