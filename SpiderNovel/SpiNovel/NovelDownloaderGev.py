@@ -24,8 +24,8 @@ except ImportError:
 ##############################################
 #------------------常量定义------------------#
 ##############################################
-URL = 'http://www.quyuege.com/xs/43/43176/'
-# URL = 'http://www.quyuege.com/xs/144/144341/'
+# URL = 'http://www.quyuege.com/xs/43/43176/'
+URL = 'http://www.quyuege.com/xs/144/144341/'
 EOL = u'\n'
 pickleFile = os.getcwd()+'pickle.txt'
 

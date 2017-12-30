@@ -8,21 +8,15 @@ __author__ = 'AC'
 
 ##############################################
 #------------------import--------------------#
-############################################## 
-import urllib2
-from bs4 import BeautifulSoup
+##############################################
 import re
 import sys
-from NovelDownloader import NovelDownloader
-from NovelDownloaderMulti import NovelDownloaderMulti
-from NovelDownloaderGev import NovelDownloaderGev
+from SpiNovel import NovelDownloader, NovelDownloaderMulti, NovelDownloaderGev
 
 ##############################################
 #------------------常量定义------------------#
 ##############################################
-# URL = 'http://www.quyuege.com/xs/43/43176/'
-URL = 'https://www.23us.la/html/247/247068/'
-# URL = 'https://www.23us.la/html/151/151769/'
+URL = 'http://www.quyuege.com/xs/144/144341/'
 EOL = u'\n'
 
 ##############################################
@@ -33,9 +27,7 @@ EOL = u'\n'
 ##############################################
 #------------------类定义--------------------#
 ##############################################
-class NovelDownloader23us(NovelDownloader):
-
-    rootUrl = 'https://www.23us.la'
+class NovelDownloader_QuYueGe(NovelDownloader):
 
     def GetNovelListDispatch(self, soup):
         '''
@@ -46,14 +38,13 @@ class NovelDownloader23us(NovelDownloader):
         novel = {}
         novelUrlList = []
         # novel title and properties
-        novelProperties = soup.find_all('div', class_="btitle")[0]
+        novelProperties = soup.find_all('div', class_="rtext")[0]
         novel['Title'] = novelProperties.find_all('h1')[0].string
-        novel['Author'] = novelProperties.find_all('em')[0].string
-        novelProperties = soup.find_all('p', class_="intro")[0]
-        novel['Abstract'] = novelProperties.find_all('b')[0].string
+        novel['Author'] = novelProperties.find_all('a')[0].string
+        novel['Abstract'] = novelProperties.find_all('div', class_="desc")[0].string
 
         # novel url list
-        novelList = soup.find_all('dl', class_="chapterlist")[0]
+        novelList = soup.find_all('div', "mod mod-article-list")[0]
         for novelUrl in novelList.find_all('a'):
             novelUrlList.append(novelUrl['href'])
         novel['UrlList'] = novelUrlList
@@ -66,23 +57,25 @@ class NovelDownloader23us(NovelDownloader):
         :return: title, text
         '''
         # find novel title
-        novelTitle = soup.find_all('div', class_="inner", id="BookCon")[0]
-        title = novelTitle.find_all('h1')[0].string
+        title = soup.find_all('h1')[0].string
+
         # find novel text
-        matchObj = re.search(u'<div id="content".*?>\s*(.*?)</div>', unicode(novelTitle), re.M | re.S)
+        novelText = soup.find_all('div', class_="page-content")[0]
+        matchObj = re.search(u'固定结束-->(.*)</div>', unicode(novelText), re.M | re.S)
         if not matchObj:
             text = ''
         else:
             text = matchObj.group(1)
+
         return title, text
 
     def NovelUrlComb(self, novelUrl):
-        return self.rootUrl + novelUrl
+        return self.webPageUrl + novelUrl
 
-class NovelDownloader23usMulti(NovelDownloaderMulti,NovelDownloader23us):
+class NovelDownloader_QuYueGeMulti(NovelDownloaderMulti,NovelDownloader_QuYueGe):
     pass
 
-class NovelDownloader23usGev(NovelDownloaderGev,NovelDownloader23us):
+class NovelDownloader_QuYueGeGev(NovelDownloaderGev,NovelDownloader_QuYueGe):
     pass
 
 
@@ -92,17 +85,19 @@ class NovelDownloader23usGev(NovelDownloaderGev,NovelDownloader23us):
 if __name__ == '__main__':
     # argv check
     webPageUrl = URL
-    startChap = 0
+    startChap = 1
     if len(sys.argv) < 2:
         print 'For debug usage!'
     elif len(sys.argv) == 2:
         webPageUrl = str(sys.argv[1])
     elif len(sys.argv) == 3:
         webPageUrl = str(sys.argv[1])
-        startChap = int(sys.argv[2]) - 1
+        startChap = int(sys.argv[2])
     else:
         raise Exception("too many input parameters (>2)")
 
-    # novelDL = NovelDownloader23us(webPageUrl)
-    novelDL = NovelDownloader23usGev(webPageUrl)
+    if startChap < 1:
+        raise ValueError("startChap must larger than 1")
+
+    novelDL = NovelDownloader_QuYueGeGev(webPageUrl)
     novelDL.GetNovel(startChap)
