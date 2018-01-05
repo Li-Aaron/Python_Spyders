@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-程序名称 NovelGeDownloader--www.23us.la
+程序名称 NovelGeDownloader--www.quyuege.com
 @Author: AC
-2017-12-25
+2017-12-30
 '''
 __author__ = 'AC'
 

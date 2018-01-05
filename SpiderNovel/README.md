@@ -11,8 +11,6 @@ NovelDownloader23us重命名
 #### [NovelDownloader_Quyuege]  
 新增NovelDownloader_Quyuege
 
-
-
 ## 2017-12-30  
 #### [NovelDownloaderMulti]  
 StartChap统一为从1开始
