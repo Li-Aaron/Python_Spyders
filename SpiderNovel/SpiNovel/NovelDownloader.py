@@ -86,6 +86,9 @@ class NovelDownloader(object):
         ret = re.sub(u'\r', EOL, ret)
         ret = re.sub(u'[  \t　]{2,}', u'', ret)
         ret = re.sub(u'\n{2,}', EOL, ret)
+        #remove &amp;lt;u&amp;gt
+        ret = re.sub(u'&amp;lt;u&amp;gt;','',ret)
+        ret = re.sub(u'&amp;lt;u&amp;','',ret)
         return ret
 
     def GetNovelList(self):
