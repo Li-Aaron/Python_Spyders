@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-程序名称 NovelGeDownloader--www.quyuege.com
+程序名称 NovelGeDownloader--www.ucxiaoshuo.com
 @Author: AC
 2017-12-30
 '''
@@ -33,7 +33,7 @@ class NovelDownloader_Biquwu(NovelDownloader):
 
     def GetNovelListDispatch(self, soup):
         '''
-        Get Novel List (QuYueGe Version)
+        Get Novel List (BiQuWu Version)
         :param soup: soup of html string lxml
         :return: novel : key('Title','Author','Abstract','UrlList')
         '''
@@ -55,7 +55,7 @@ class NovelDownloader_Biquwu(NovelDownloader):
 
     def GetNovelTextDispatch(self, soup):
         '''
-        Get Novel Text (QuYueGe Version)
+        Get Novel Text (BiQuWu Version)
         :param soup: soup of html string lxml
         :return: title, text
         '''
