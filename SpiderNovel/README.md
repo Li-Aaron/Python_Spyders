@@ -3,9 +3,9 @@
 调用方法 python NovelDownloader_[SITENAME].py http_url(小说目录页) 章节数(续下用，默认为1)  
 
 ## 2018-2-18
-####[SpiNovel]
+#### [SpiNovel]
 NovelDownloader 增加对&amp;lt;u&amp;gt;的处理
-####[NovelDownloader_Biquwu]
+#### [NovelDownloader_Biquwu]
 新增NovelDownloader_Biquwu
 
 ## 2017-12-30  
