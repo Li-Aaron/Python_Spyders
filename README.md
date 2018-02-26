@@ -1,8 +1,11 @@
 # Python_Spyders
 爬虫学习用库
 
+## 2018-2-26
+[test/test_savenodb]数据存储json,csv;图片下载;发邮件
+
 ## 2017-12-8
-[test/test_web]HTTP请求实现学习,proxy等
+[test/test_web]HTTP请求实现学习,proxy等  
 
 ## 2017-11-26
 [test]整理  

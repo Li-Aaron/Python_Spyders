@@ -1,6 +1,11 @@
 # SpiderNovel
 下小说的爬虫脚本  
-调用方法 python NovelDownloader_[SITENAME].py http_url(小说目录页) 章节数(续下用，默认为1)  
+调用方法 python NovelDownloader_[SITENAME].py http_url(小说目录页) 章节数(续下用，默认为1) 
+ 
+## 2018-2-26
+#### [SpiNovel]
+NovelDownloader &amp;lt;u&amp;gt;处理正则表达式修改
+
 
 ## 2018-2-18
 #### [SpiNovel]
