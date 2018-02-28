@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     # email
     from_addr = 'lsp_python@yeah.net'
-    password = '*************'
+    password = '139849e7b513a738'
     to_addr = 'ac2sherry@126.com'
     smtp_server = 'smtp.yeah.net'
 

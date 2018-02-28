@@ -1,8 +1,12 @@
 # Python_Spyders
 爬虫学习用库
 
+## 2018-2-28
+[test/test_spider_basic]基础爬虫：百度百科  
+[test/test_spider_distributed]分布式爬虫：百度百科(未完成)  
+
 ## 2018-2-26
-[test/test_savenodb]数据存储json,csv;图片下载;发邮件
+[test/test_savenodb]数据存储json,csv;图片下载;发邮件  
 
 ## 2017-12-8
 [test/test_web]HTTP请求实现学习,proxy等  
