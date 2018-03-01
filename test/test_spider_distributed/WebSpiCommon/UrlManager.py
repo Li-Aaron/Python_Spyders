@@ -123,5 +123,23 @@ class UrlManager(object):
 ##############################################
 if __name__ == '__main__':
     # argv check
-    pass
+    manager = UrlManager()
+    print 1,manager.HasNewUrl()
+    manager.AddNewUrl('www.baidu.com')
+    print 2,manager.NewUrlSize()
+    print 3,manager.HasNewUrl()
+    manager.AddNewUrl(u'www.baidu.com')
+    print 4,manager.NewUrlSize()
+    print 5,manager.GetNewUrl()
+    print 6,manager.NewUrlSize()
+    print 7,manager.OldUrlSize()
+    manager.AddNewUrl('www.baidu.com')
+    print 8,manager.NewUrlSize()
+    print 9,manager.OldUrlSize()
+    print 10,manager.HasNewUrl()
+    print 11,manager.old_urls
+    manager.SaveProgress(manager.old_urls)
+    print 12,manager.LoadProgress()
+
+
 

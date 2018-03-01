@@ -1,6 +1,9 @@
 # Python_Spyders
 爬虫学习用库
 
+## 2018-3-1
+[test/test_spider_distributed]分布式爬虫：百度百科(存在队列full的问题)  
+
 ## 2018-2-28
 [test/test_spider_basic]基础爬虫：百度百科  
 [test/test_spider_distributed]分布式爬虫：百度百科(未完成)  
