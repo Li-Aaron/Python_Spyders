@@ -11,6 +11,7 @@ __author__ = 'AC'
 #------------------import--------------------#
 ############################################## 
 import codecs
+import chardet
 import csv
 ##############################################
 #------------------常量定义------------------#
@@ -21,7 +22,10 @@ import csv
 #------------------函数定义------------------#
 ##############################################
 def ToUTF8(content):
-    return content.encode('utf-8') if isinstance(content, unicode) else content
+    if isinstance(content, unicode):
+        return content.encode('utf-8')
+    else:
+        return content.decode(chardet.detect(content)['encoding']).encode('utf-8')
 
 ##############################################
 #------------------类定义--------------------#
