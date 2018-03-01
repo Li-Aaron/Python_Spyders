@@ -24,8 +24,10 @@ import chardet
 def ToUTF8(content):
     if isinstance(content, unicode):
         return content.encode('utf-8')
-    else:
+    elif isinstance(content, str):
         return content.decode(chardet.detect(content)['encoding']).encode('utf-8')
+    else:
+        raise TypeError('content must be basestring, not %s'%(type(content),))
 
 ##############################################
 #------------------类定义--------------------#
