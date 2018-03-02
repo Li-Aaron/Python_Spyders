@@ -35,7 +35,7 @@ import time
 URL = 'https://baike.baidu.com/item/网络爬虫/5162711'
 MANAGER_IP = '127.0.0.1'
 MANAGER_PORT = 8001
-LOG_CONTROL = LogPrint.INFO|LogPrint.ERROR|LogPrint.DEBUG|LogPrint.DISP|LogPrint.FILE
+LOG_CONTROL = LogPrint.INFO|LogPrint.ERROR|LogPrint.DEBUG|LogPrint.DISP
 LOG_FILENAME = 'manager_log_%s.txt' % (time.strftime("%Y%m%d_%H%M%S",time.localtime()),)
 
 ##############################################
@@ -108,15 +108,17 @@ class SpiManager(object):
                         url_manager.SaveProgress('old_urls.txt',url_manager.old_urls)
                         return
                 else:
-                    time.sleep(0.5)
+                    Log('[UrlManagerProc]Url Queue Full', log_type=LogPrint.DEBUG)
+                    break # 这里要退出while 不然会导致Connection Queue满掉
             # get new_urls <-- ResultSolveProc
             try:
                 if not queue_conn.empty():
                     urls = queue_conn.get(True, timeout = 1)
+                    Log('[UrlManagerProc]Get %s Urls from ResultSolveProc'%(len(urls),), log_type=LogPrint.DEBUG)
                     url_manager.AddNewUrls(urls)
                 else:
-                    Log('[UrlManagerProc]No url get from ResultSolveProc', log_type=LogPrint.DEBUG)
-                    time.sleep(0.1)
+                    Log('[UrlManagerProc]Connection Queue Empty (No url get from ResultSolveProc)', log_type=LogPrint.DEBUG)
+                    time.sleep(0.5)
             except BaseException,e:
                 Log('[UrlManagerProc]', log_type=LogPrint.ERROR)
                 time.sleep(0.5)
@@ -132,11 +134,14 @@ class SpiManager(object):
         while True:
             try:
                 if queue_result.empty():
-                    Log('[ResultSolveProc]No content get from Node', log_type=LogPrint.DEBUG)
+                    Log('[ResultSolveProc]Result Queue Empty (No content get from Node)', log_type=LogPrint.DEBUG)
+                    time.sleep(0.5)
                 elif queue_store.full():
                     Log('[ResultSolveProc]Storage Queue Full', log_type=LogPrint.DEBUG)
+                    time.sleep(0.5)
                 elif queue_conn.full():
                     Log('[ResultSolveProc]Connection Queue Full', log_type=LogPrint.DEBUG)
+                    time.sleep(0.5)
                 else:
                     content = queue_result.get(True, timeout=1)
                     # end <-- node
@@ -145,10 +150,9 @@ class SpiManager(object):
                         # end --> store
                         queue_store.put('end', timeout=1)
                         return
-                    print content
+                    Log('[ResultSolveProc]Solve %s urls, %s' %(len(content['new_urls']),LogPrint.ToUTF8(content['data']['title'])), log_type=LogPrint.DEBUG)
                     queue_conn.put(content['new_urls'], timeout=1)
                     queue_store.put(content['data'], timeout=1)
-                time.sleep(0.5)
             except BaseException, e:
                 Log('[ResultSolveProc]', log_type=LogPrint.ERROR)
                 time.sleep(0.5)
@@ -172,7 +176,7 @@ class SpiManager(object):
                 Log('[DataOutputProc][%04d]store %s' % (idx,LogPrint.ToUTF8(data['title'])), log_type=LogPrint.INFO)
                 idx += 1
             else:
-                Log('[DataOutputProc]No data get from ResultSolveProc', log_type=LogPrint.DEBUG)
+                Log('[DataOutputProc]Store Queue Empty(No data get from ResultSolveProc)', log_type=LogPrint.DEBUG)
                 time.sleep(0.5)
 
 ##############################################
