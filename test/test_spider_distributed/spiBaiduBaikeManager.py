@@ -26,36 +26,45 @@ from multiprocessing import freeze_support
 
 from WebSpiCommon import DataOutput
 from WebSpiCommon import UrlManager
-import LogPrint
 
+import chardet
 import time
+
+# log 日志记录
+import logging
+import logging.config
+import yaml
+
+log_conf = './logger.yml'
+with open(log_conf, 'rt') as f:
+    config = yaml.safe_load(f.read())
+logging.config.dictConfig(config)
+logger = logging.getLogger('manager')
 ##############################################
 #------------------常量定义------------------#
 ##############################################
 URL = 'https://baike.baidu.com/item/网络爬虫/5162711'
 MANAGER_IP = '127.0.0.1'
 MANAGER_PORT = 8001
-LOG_CONTROL = LogPrint.INFO|LogPrint.ERROR|LogPrint.DEBUG|LogPrint.DISP
-LOG_FILENAME = 'manager_log_%s.txt' % (time.strftime("%Y%m%d_%H%M%S",time.localtime()),)
+
 
 ##############################################
 #------------------函数定义------------------#
 ##############################################
-def Schedule(num, totalNum, printFlg = True, note = ''):
-    process = 100.0 * num / totalNum
-    note = '(%s)'% note if note else ''
-    if printFlg:
-        print "[%4.3f%%] %5d of %5d is done %s..." % (process, num, totalNum, note)
-    return process
-
-def Log(content, log_type):
-    LogPrint.LogPrint(content, log_type=log_type, log_control=LOG_CONTROL, filename=LOG_FILENAME)
-
+def ToUTF8(content):
+    if isinstance(content, unicode):
+        return content.encode('utf-8')
+    else:
+        return content.decode(chardet.detect(content)['encoding']).encode('utf-8')
 
 ##############################################
 #------------------类定义--------------------#
 ##############################################
 class SpiManager(object):
+
+    def __init__(self, root_url, max_crawl_size = 100):
+        self.root_url = root_url
+        self.max_crawl_size = max_crawl_size
 
     def StartManager(self, queue_url, queue_result):
         '''
@@ -76,7 +85,7 @@ class SpiManager(object):
 
         return manager
 
-    def UrlManagerProc(self, queue_url, queue_conn, root_url = URL, max_crawl_size = 2000):
+    def UrlManagerProc(self, queue_url, queue_conn):
         '''
         url manager process
         :param queue_url: url 队列（外部）
@@ -85,7 +94,7 @@ class SpiManager(object):
         :return:
         '''
         url_manager = UrlManager()
-        url_manager.AddNewUrl(root_url)
+        url_manager.AddNewUrl(self.root_url)
         idx = 1
         # FOREVER
         while True:
@@ -96,31 +105,31 @@ class SpiManager(object):
                     new_url = url_manager.GetNewUrl()
                     # url --> node
                     queue_url.put(new_url, timeout = 1)
-                    Log('[UrlManagerProc][%04d]Put Url: %s' % (idx,LogPrint.ToUTF8(new_url),), log_type=LogPrint.DEBUG)
+                    logger.debug('[%04d]Put Url: %s' % (idx,ToUTF8(new_url),))
                     idx += 1
                     # Log('[UrlManagerProc]Old Url Size: %s' % (url_manager.OldUrlSize(),), log_type=LogPrint.DEBUG)
-                    if(url_manager.OldUrlSize() > max_crawl_size):
+                    if(url_manager.OldUrlSize() >= self.max_crawl_size):
                         # end --> node
                         queue_url.put('end', timeout = 1)
-                        Log('Put ending to Node', log_type=LogPrint.INFO)
+                        logger.info('Put ending to Node')
                         # save progress
-                        url_manager.SaveProgress('new_urls.txt',url_manager.new_urls)
-                        url_manager.SaveProgress('old_urls.txt',url_manager.old_urls)
+                        url_manager.SaveProgress(url_manager.new_urls,filename='new_urls.txt')
+                        url_manager.SaveProgress(url_manager.old_urls,filename='old_urls.txt')
                         return
                 else:
-                    Log('[UrlManagerProc]Url Queue Full', log_type=LogPrint.DEBUG)
+                    logger.warn('Url Queue Full')
                     break # 这里要退出while 不然会导致Connection Queue满掉
             # get new_urls <-- ResultSolveProc
             try:
                 if not queue_conn.empty():
                     urls = queue_conn.get(True, timeout = 1)
-                    Log('[UrlManagerProc]Get %s Urls from ResultSolveProc'%(len(urls),), log_type=LogPrint.DEBUG)
+                    logger.debug('Get %s Urls from ResultSolveProc'%(len(urls),))
                     url_manager.AddNewUrls(urls)
                 else:
-                    Log('[UrlManagerProc]Connection Queue Empty (No url get from ResultSolveProc)', log_type=LogPrint.DEBUG)
+                    logger.debug('Connection Queue Empty (No url get from ResultSolveProc)')
                     time.sleep(0.5)
             except BaseException,e:
-                Log('[UrlManagerProc]', log_type=LogPrint.ERROR)
+                logger.error(e)
                 time.sleep(0.5)
 
     def ResultSolveProc(self, queue_conn, queue_result, queue_store):
@@ -131,30 +140,37 @@ class SpiManager(object):
         :param queue_store: 存储队列（内部）
         :return:
         '''
+        crawled_url = 0
         while True:
             try:
                 if queue_result.empty():
-                    Log('[ResultSolveProc]Result Queue Empty (No content get from Node)', log_type=LogPrint.DEBUG)
+                    logger.info('Result Queue Empty (No content get from Node)')
                     time.sleep(0.5)
                 elif queue_store.full():
-                    Log('[ResultSolveProc]Storage Queue Full', log_type=LogPrint.DEBUG)
+                    logger.warn('Storage Queue Full')
                     time.sleep(0.5)
-                elif queue_conn.full():
-                    Log('[ResultSolveProc]Connection Queue Full', log_type=LogPrint.DEBUG)
+                elif queue_conn.full() and crawled_url < self.max_crawl_size:
+                    # 在没有爬完的情况下队列满了
+                    logger.info('Connection Queue Full / not finish')
                     time.sleep(0.5)
                 else:
                     content = queue_result.get(True, timeout=1)
                     # end <-- node
                     if content['new_urls'] == 'end':
-                        Log('ResultSolveProc ending from Node', log_type=LogPrint.INFO)
+                        logger.info('Ending from Node')
                         # end --> store
                         queue_store.put('end', timeout=1)
                         return
-                    Log('[ResultSolveProc]Solve %s urls, %s' %(len(content['new_urls']),LogPrint.ToUTF8(content['data']['title'])), log_type=LogPrint.DEBUG)
-                    queue_conn.put(content['new_urls'], timeout=1)
+                    crawled_url += len(content['new_urls'])
+                    logger.debug('Solve %s urls, %s' %(crawled_url,ToUTF8(content['data']['title'])))
+                    if not queue_conn.full():
+                        queue_conn.put(content['new_urls'], timeout=1)
+                    else:
+                        # 在已经爬完的情况下队列满了
+                        logger.info('Connection Queue Full / finished')
                     queue_store.put(content['data'], timeout=1)
             except BaseException, e:
-                Log('[ResultSolveProc]', log_type=LogPrint.ERROR)
+                logger.error(e)
                 time.sleep(0.5)
 
     def DataOutputProc(self, queue_store):
@@ -169,14 +185,14 @@ class SpiManager(object):
             if not queue_store.empty():
                 data = queue_store.get(True, timeout = 1)
                 if data == 'end':
-                    Log('DataOutputProc ending from ResultSolveProc', log_type=LogPrint.INFO)
+                    logger.info('Ending from ResultSolveProc')
                     del output
                     return
                 output.StoreData(data)
-                Log('[DataOutputProc][%04d]store %s' % (idx,LogPrint.ToUTF8(data['title'])), log_type=LogPrint.INFO)
+                logger.info('[%04d]store %s' % (idx,ToUTF8(data['title'])))
                 idx += 1
             else:
-                Log('[DataOutputProc]Store Queue Empty(No data get from ResultSolveProc)', log_type=LogPrint.DEBUG)
+                logger.info('Store Queue Empty(No data get from ResultSolveProc)')
                 time.sleep(0.5)
 
 ##############################################
@@ -184,20 +200,21 @@ class SpiManager(object):
 ##############################################
 if __name__ == '__main__':
     # init queue
-    max_size = 200
-    queue_url = Queue(max_size)
-    queue_result = Queue(max_size)
-    queue_conn = Queue(max_size)
-    queue_store = Queue(max_size)
+    max_queue_size = 200
+    max_crawl_size = 2000
+    queue_url = Queue(max_queue_size)
+    queue_result = Queue(max_queue_size)
+    queue_conn = Queue(max_queue_size)
+    queue_store = Queue(max_queue_size)
 
     # create distributed manager
-    sm = SpiManager()
+    sm = SpiManager(URL, max_crawl_size)
     manager = sm.StartManager(queue_url=queue_url, queue_result=queue_result)
 
     # create processes
-    url_manager_proc = Process(target=sm.UrlManagerProc, args=(queue_url, queue_conn, URL))
-    result_solve_proc = Process(target=sm.ResultSolveProc, args=(queue_conn, queue_result, queue_store))
-    data_output_proc = Process(target=sm.DataOutputProc, args=(queue_store,))
+    url_manager_proc = Process(target=sm.UrlManagerProc, args=(queue_url, queue_conn),name='UrlManagerProc')
+    result_solve_proc = Process(target=sm.ResultSolveProc, args=(queue_conn, queue_result, queue_store),name='ResultSolveProc')
+    data_output_proc = Process(target=sm.DataOutputProc, args=(queue_store,),name='DataOutputProc')
 
     # start processes and manager
     url_manager_proc.start()

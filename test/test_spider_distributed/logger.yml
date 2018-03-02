@@ -1,0 +1,41 @@
+version: 1
+
+formatters:
+  brief:
+    format: '[%(levelname)8s] - [%(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(message)s'
+  precise:
+    format: '[%(asctime)s][%(name)s][%(levelname)8s] - [%(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+  console:
+    class    : logging.StreamHandler
+    formatter: brief
+    level    : INFO
+    stream   : ext://sys.stdout
+  file_master:
+    class    : logging.handlers.RotatingFileHandler
+    formatter: precise
+    filename : log_master.log
+    maxBytes : 10485760
+    backupCount: 3
+  file_node:
+    class    : logging.handlers.RotatingFileHandler
+    formatter: precise
+    filename : log_node.log
+    maxBytes : 10485760
+    backupCount: 3
+
+loggers:
+  manager:
+    level    : DEBUG
+    handlers : [console,file_master]
+    propagate: False
+  node:
+    level    : DEBUG
+    handlers : [console,file_node]
+    propagate: False
+
+root:
+  level : DEBUG
+  handlers: [console]

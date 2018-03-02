@@ -26,30 +26,35 @@ from multiprocessing import freeze_support
 
 from WebSpiCommon import HtmlDownloader
 from WebSpiCommon import HtmlParser
-import LogPrint
-
+import chardet
 import time
+
+# log 日志记录
+import logging
+import logging.config
+import yaml
+
+log_conf = './logger.yml'
+with open(log_conf, 'rt') as f:
+    config = yaml.safe_load(f.read())
+logging.config.dictConfig(config)
+logger = logging.getLogger('node')
+
 ##############################################
 #------------------常量定义------------------#
 ##############################################
 MANAGER_IP = '127.0.0.1'
 MANAGER_PORT = 8001
-LOG_CONTROL = LogPrint.INFO|LogPrint.ERROR|LogPrint.DEBUG|LogPrint.DISP|LogPrint.FILE
-LOG_FILENAME = 'node_log_%s.txt' % (time.strftime("%Y%m%d_%H%M%S",time.localtime()),)
+
 
 ##############################################
 #------------------函数定义------------------#
 ##############################################
-def Schedule(num, totalNum, printFlg = True, note = ''):
-    process = 100.0 * num / totalNum
-    note = '(%s)'% note if note else ''
-    if printFlg:
-        print "[%4.3f%%] %5d of %5d is done %s..." % (process, num, totalNum, note)
-    return process
-
-def Log(content, log_type):
-    LogPrint.LogPrint(content, log_type=log_type, log_control=LOG_CONTROL, filename=LOG_FILENAME)
-
+def ToUTF8(content):
+    if isinstance(content, unicode):
+        return content.encode('utf-8')
+    else:
+        return content.decode(chardet.detect(content)['encoding']).encode('utf-8')
 
 ##############################################
 #------------------类定义--------------------#
@@ -63,7 +68,7 @@ class SpiNode(object):
         BaseManager.register('get_result_queue')
 
         # connect to manager
-        Log('Connect to server %s' %(MANAGER_IP,), log_type=LogPrint.INFO)
+        logger.info('Connect to server %s' %(MANAGER_IP,))
         self.manager = BaseManager(address=(MANAGER_IP,MANAGER_PORT), authkey='spiBaiduBaike')
         self.manager.connect()
 
@@ -74,37 +79,40 @@ class SpiNode(object):
         # init downloader and parser
         self.downloader = HtmlDownloader()
         self.parser = HtmlParser()
-        Log('Node Start Finish', log_type=LogPrint.INFO)
+        logger.info('Node Start Finish')
 
     def Crawl(self):
         while True:
             try:
                 # url <-- Manager(UrlManagerProc)
                 if self.q_url.empty():
-                    Log('No url in Queue', log_type=LogPrint.DEBUG)
+                    logger.warn('No url in Queue')
                 elif self.q_result.full():
-                    Log('Result Queue Full', log_type=LogPrint.DEBUG)
+                    logger.warn('Result Queue Full')
                 else:
                     url = self.q_url.get()
                     # end --> Manager(ResultSolveProc)
                     if url == 'end':
-                        Log('Put ending to Manager', log_type=LogPrint.INFO)
+                        self.q_url.put('end', timeout=1)  # notify other nodes
+                        time.sleep(3) # 保证每个节点都下载完了(应该有更好的方法)
+                        logger.info('Put ending to Manager')
                         content = {'new_urls':'end','data':'end'}
                         self.q_result.put(content, timeout = 1)
                         return
                     # content --> Manager(ResultSolveProc)
-                    Log('Node Crawling %s'%(LogPrint.ToUTF8(url),), log_type=LogPrint.INFO)
+                    logger.info('Node Crawling %s'%(ToUTF8(url),))
                     html_content = self.downloader.OpenWebPage(url)
                     new_urls, data = self.parser.Parser(url, html_content)
-                    Log('Node Crawled %s' % (LogPrint.ToUTF8(data['title']),), log_type=LogPrint.INFO)
+                    logger.info('Node Crawled %s' % (ToUTF8(data['title']),))
                     content = {"new_urls":new_urls,"data":data}
                     self.q_result.put(content, timeout = 1)
                 time.sleep(0.1)
             except EOFError, e:
-                Log('Connection Error', log_type=LogPrint.ERROR)
+                logger.error('Connection Error')
                 return
             except Exception, e:
-                Log('Crawling Failed', log_type=LogPrint.ERROR)
+                logger.error('Crawling Failed')
+                logger.error(e)
                 time.sleep(0.5)
 
 ##############################################
