@@ -1,6 +1,13 @@
 # Python_Spyders
 爬虫学习用库
 
+
+## 2018-3-2
+[test/test_spider_distributed]分布式爬虫：百度百科  
+1. 修复队列full的问题  
+2. 修复多node不能正常结束问题  
+3. log打印改用logging模块  
+
 ## 2018-3-1
 [test/test_spider_distributed]分布式爬虫：百度百科(存在队列full的问题)  
 
