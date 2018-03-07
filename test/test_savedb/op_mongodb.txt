@@ -1,0 +1,44 @@
+use TEST               // create db
+show dbs               // show all db
+db                     // show db name
+db.dropDatabase()      // drop db
+
+// insert
+db.TEST.insert({title:'python',
+	description:'动态语言',
+	url:'http://www.python.org',
+	tags:['动态','编程','脚本'],
+	likes:100
+})
+
+db.TEST.insert({title:'C',
+	description:'静态语言',
+	tags:['静态','编程'],
+	likes:80
+})
+
+// select
+db.TEST.find()
+db.TEST.find().pretty()
+
+// condition
+db.TEST.find({"likes":{$gte:90}})        // >=
+db.TEST.find({"likes":{$gt:90}})         // >
+db.TEST.find({"likes":{$lte:90}})        // <=
+db.TEST.find({"likes":{$lt:90}})         // <
+db.TEST.find({"likes":{$ne:90}})         // !=
+db.TEST.find({"likes":90})               // ==
+
+// or
+db.TEST.find(
+	{
+		$or: [
+			{"likes":{$gte:90}}, {"title":"C"}
+		]
+	}
+)
+
+// and
+db.TEST.find(
+	{"likes":{$gte:90}, "title":"python"}
+)
