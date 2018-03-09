@@ -42,3 +42,32 @@ db.TEST.find(
 db.TEST.find(
 	{"likes":{$gte:90}, "title":"python"}
 )
+
+// update first one
+db.TEST.update(
+	{'title':'python'}, {$set:{'title':'python 爬虫'}}
+)
+
+// update all
+db.TEST.update(
+	{'title':'python'}, {$set:{'title':'python 爬虫'}}, {multi:true}
+)
+
+// save
+db.TEST.save(
+	{
+        "_id" : ObjectId("5aa0023650cc16905ddb6fed"),
+        "title" : "C 语言",
+        "description" : "静态语言",
+        "tags" : [
+                "静态",
+                "编程"
+        ],
+        "likes" : 80
+	}
+)
+
+// remove
+db.TEST.remove({'title':'C 语言'})
+
+

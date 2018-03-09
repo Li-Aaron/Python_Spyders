@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-sqlite3 operators example
+mysql operators example
 @Author: AC
 2017-11-5
 '''
