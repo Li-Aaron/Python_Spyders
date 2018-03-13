@@ -4,7 +4,7 @@
 ## test各子目录功能
 [test] 序列化 线程/进程/微线程 TCP/UDP  
 [test/test_web] HTTP请求实现,proxy等  
-[test/test_savenodb] 数据存储json,csv;图片下载;发邮件  
+[test/test_savenodb] 数据存储json,csv;图片下载;发邮件  
 [test/test_savedb] sqlite, mysql, mongodb  
 
 [test/test_spider_basic] 基础爬虫：百度百科  
