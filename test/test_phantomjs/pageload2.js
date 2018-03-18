@@ -1,4 +1,4 @@
-/*
+﻿/*
 * 获取网页并截图 -- 函数拿出来了
 */
 function pageload(status) {

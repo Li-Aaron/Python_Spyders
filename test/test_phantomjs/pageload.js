@@ -1,4 +1,4 @@
-/*
+﻿/*
 * 获取网页并截图 -- 用匿名函数
 */
 var page = require('webpage').create();

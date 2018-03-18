@@ -1,34 +1,36 @@
-/*
+﻿/*
 * jQuery测试
 */
-
+"use strict";
 /* variables */
-var url = 'http://www.ucxiaoshuo.com/book/9354/4482326.html';
+var url = 'http://phantomjs.org/';
+phantom.outputEncoding="gbk";
 
 /* functions */
-function pageload(status) {
-    console.log("Status: " + status);
-    if (status !== 'success') {
-        console.log("Unable to access network");
-    } else {
-        console.log("Accessed network");
-        page.includeJs("http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.1.js", function () {
-            $("#book_text").css("background-color","red");
-        });
-        // $("#book_text").css("background-color","red");
-        page.render('page2.png');
-    }
-    phantom.exit();
-}
 
 /* main */
 var page = require('webpage').create();
-// console.log("The default user agent is:\n" + page.settings.userAgent);
-//Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.1 Safari/538.1
-page.settings.userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:49.0) Gecko/20100101 Firefox/49.0";
-// console.log("The setting user agent is:\n" + page.settings.userAgent);
 
-page.open(url, pageload);
+page.open(url, function(status) {
+    if (status === "success") {
+        page.render('page1.png');
+        console.log("page1.png saved success");
+        page.includeJs("http://code.jquery.com/jquery-1.6.1.min.js", function() {
+            page.evaluate(function() {
+                // jQuery is loaded
+                var jqsel = $('.explanation');
+                // console.log("$(\".explanation\").text() -> " + jqsel.text());
+                jqsel.text('My PhantomJS');
+                // console.log("$(\".explanation\").text() -> " + jqsel.text());
+            });
+            page.render('page2.png');
+            console.log("page2dnh.png saved success");
+            phantom.exit(0);
+        });
+    } else {
+        phantom.exit(1);
+    }
+});
 
 // 直接在这里退出会导致pageload执行不完
 // phantom.exit();
