@@ -24,7 +24,7 @@ page.open(url, function(status) {
                 // console.log("$(\".explanation\").text() -> " + jqsel.text());
             });
             page.render('page2.png');
-            console.log("page2dnh.png saved success");
+            console.log("page2.png saved success");
             phantom.exit(0);
         });
     } else {
