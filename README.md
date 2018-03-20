@@ -11,6 +11,7 @@
 [test/test_spider_basic] 基础爬虫：百度百科  
 [test/test_spider_distributed] 分布式爬虫：百度百科  
 [test/test_spider_mtimes] 动态网页爬虫 + sqlite：时光网  
+[test/test_spider_qunar] 动态网页爬虫 (python+selenium+chrome)：去哪网  
 
 ## 库内子工程
 [Sort] 各种排序算法Python实现  
