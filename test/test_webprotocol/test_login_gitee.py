@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-程序名称
+gitee 登陆
 @Author: AC
 2018-3-21
 '''
@@ -12,7 +12,10 @@ __author__ = 'AC'
 ##############################################
 import requests
 from bs4 import BeautifulSoup
-
+try:
+    import cPickle as pickle
+except:
+    import pickle
 ##############################################
 #------------------常量定义------------------#
 ##############################################
@@ -48,6 +51,22 @@ def isLogin(session):
         return True
     else:
         return False
+
+def save_session(session):
+    with open('zhihu_session.txt', 'wb') as fout:
+        pickle.dump(session.headers, fout)
+        pickle.dump(session.cookies.get_dict(), fout)
+        print('session 已写入文件')
+
+def load_session():
+    try:
+        with open('zhihu_session.txt', 'rb') as fout:
+            headers = pickle.load(fout)
+            cookies = pickle.load(fout)
+            print('session 已写读取文件')
+            return headers,cookies
+    except:
+        print('无session文件')
 ##############################################
 #------------------类定义--------------------#
 ##############################################
@@ -77,6 +96,8 @@ if __name__ == '__main__':
     print(login_page.status_code)
     print(isLogin(session))
 
-
-
-
+    # 保存cookie可以免二次登陆（这里是测试）
+    save_session(session)
+    headers, cookies = load_session()
+    print(headers)
+    print(cookies)
