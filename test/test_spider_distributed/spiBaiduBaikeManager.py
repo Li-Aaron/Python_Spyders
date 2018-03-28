@@ -126,7 +126,7 @@ class SpiManager(object):
                     logger.debug('Get %s Urls from ResultSolveProc'%(len(urls),))
                     url_manager.AddNewUrls(urls)
                 else:
-                    logger.debug('Connection Queue Empty (No url get from ResultSolveProc)')
+                    logger.info('Connection Queue Empty (No url get from ResultSolveProc)')
                     time.sleep(0.5)
             except BaseException,e:
                 logger.error(e)

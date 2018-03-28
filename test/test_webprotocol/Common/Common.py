@@ -7,18 +7,13 @@
 '''
 __author__ = 'AC'
 
-
+##############################################
+#------------------import--------------------#
+##############################################
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-##############################################
-#------------------logging-------------------#
-##############################################
-import logging.config, yaml
-log_conf = './logger.yml'
-with open(log_conf, 'rt') as f:
-    config = yaml.safe_load(f.read())
-logging.config.dictConfig(config)
-logger = logging.getLogger('manager')
+from logger import logger
+
 
 ##############################################
 #------------------函数定义------------------#

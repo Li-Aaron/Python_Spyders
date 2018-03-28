@@ -20,6 +20,13 @@ handlers:
     filename : log_master.log
     maxBytes : 10485760
     backupCount: 3
+  file_manager:
+    class    : logging.handlers.RotatingFileHandler
+    formatter: precise
+    level    : DEBUG
+    filename : log_manager.log
+    maxBytes : 10485760
+    backupCount: 3
   file_node:
     class    : logging.handlers.RotatingFileHandler
     formatter: precise
@@ -29,9 +36,13 @@ handlers:
     backupCount: 3
 
 loggers:
-  manager:
+  master:
     level    : DEBUG
     handlers : [console,file_master]
+    propagate: False
+  manager:
+    level    : DEBUG
+    handlers : [console,file_manager]
     propagate: False
   node:
     level    : DEBUG

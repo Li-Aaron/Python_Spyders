@@ -53,14 +53,14 @@ def isLogin(session):
         return False
 
 def save_session(session):
-    with open('zhihu_session.txt', 'wb') as fout:
+    with open('gitee_session.txt', 'wb') as fout:
         pickle.dump(session.headers, fout)
         pickle.dump(session.cookies.get_dict(), fout)
         print('session 已写入文件')
 
 def load_session():
     try:
-        with open('zhihu_session.txt', 'rb') as fout:
+        with open('gitee_session.txt', 'rb') as fout:
             headers = pickle.load(fout)
             cookies = pickle.load(fout)
             print('session 已写读取文件')
