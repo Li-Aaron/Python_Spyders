@@ -15,7 +15,7 @@
 [test/test_spider_qunar] 动态网页爬虫 (python+selenium+chrome)：去哪网  
 
 ## Scrapy实验  
-[ScrapyTest/cnblogSpider] 基础Scrapy爬虫
+[ScrapyTest/cnblogSpider] 基础Scrapy爬虫 cnblog
 
 ## 库内子工程
 [Sort] 各种排序算法Python实现  

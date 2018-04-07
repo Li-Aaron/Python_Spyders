@@ -64,9 +64,25 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'cnblogSpider.pipelines.CnblogspiderPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'cnblogSpider.pipelines.CnblogspiderPipeline': 300, # 数字为pipeline处理流程优先级 0~1000 0：高
+    'scrapy.pipelines.files.FilesPipeline':1, # 默认的file pipeline
+    'scrapy.pipelines.images.ImagesPipeline':2, # 默认的image pipeline
+}
+# FilesPipeline Settings
+FILES_STORE = '.\\Files'
+FILES_URLS_FIELD = 'file_urls'
+FILES_RESULT_FIELD = 'files'
+FILES_EXPIRES = 30 # days
+# ImagesPipeline Settings
+IMAGES_STORE = '.\\Images'
+IMAGES_URLS_FIELD = 'image_urls'
+IMAGES_RESULT_FIELD = 'images'
+IMAGES_THUMBS = {
+   'small': (50,50),
+   'big': (270,270),
+}
+IMAGES_EXPIRES = 30 # days
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

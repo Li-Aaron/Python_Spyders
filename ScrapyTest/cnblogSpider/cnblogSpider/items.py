@@ -11,4 +11,16 @@ import scrapy
 class CnblogspiderItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+    # 用这个class创建的item用法类似于dict，但不是dict(只能建立已经有的值)
+    # 但是可以和dict转化
+    url = scrapy.Field() # dict的子类 class Field(dict)
+    time = scrapy.Field()
+    title = scrapy.Field()
+    content = scrapy.Field()
+    images = scrapy.Field()
+    image_urls = scrapy.Field()
+    # files = scrapy.Field()
+    # file_urls = scrapy.Field()
+
+class newCnblogItem(CnblogspiderItem):
+    body = scrapy.Field()
