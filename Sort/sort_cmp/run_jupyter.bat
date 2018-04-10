@@ -1,1 +1,0 @@
-jupyter-notebook %CD%/sort.ipynb

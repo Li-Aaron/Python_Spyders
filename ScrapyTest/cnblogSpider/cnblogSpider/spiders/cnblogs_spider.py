@@ -57,8 +57,8 @@ class CnblogsSpider(scrapy.Spider):
             url = paper.xpath(".//*[@class='postTitle']/a/@href").extract()[0]
             title = paper.xpath(".//*[@class='postTitle']/a/text()").extract()[0]
             time = paper.xpath(".//*[@class='dayTitle']/a/text()").extract()[0]
-            content = paper.xpath(".//*[@class='postCon']//text()").extract()[0].replace(u'\xa0', u' ') # 去&nbsp;(\xa0) 不然windows下gbk打不出来(utf-8)可以
-            print url,title,time,content
+            content = paper.xpath(".//*[@class='postCon']//text()").extract()[0]
+            print url,title,time,content.replace(u'\xa0', u' ') # 去&nbsp;(\xa0) 不然windows下gbk打不出来(utf-8)可以
             item = CnblogspiderItem(url=url, title=title, time=time, content=content)
             request = scrapy.Request(url=url, callback=self.parse_body) # 解析正文
             request.meta['item'] = item # 将item用meta方式暂存 [meta:相关页面的元信息]

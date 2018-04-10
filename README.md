@@ -18,7 +18,6 @@
 [ScrapyTest/cnblogSpider] 基础Scrapy爬虫 cnblog
 
 ## 库内子工程
-[Sort] 各种排序算法Python实现  
 [SpiderNovel] 静态网页小说下载  
 [MultiTelnet] 分布式控制telnet示意
 
