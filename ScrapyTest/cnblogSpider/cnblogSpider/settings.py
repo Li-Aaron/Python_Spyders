@@ -66,9 +66,13 @@ ROBOTSTXT_OBEY = True
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'cnblogSpider.pipelines.CnblogspiderPipeline': 300, # 数字为pipeline处理流程优先级 0~1000 0：高
+    # 'cnblogSpider.pipelines.CnblogMongoPipeline': 100,
     'scrapy.pipelines.files.FilesPipeline':1, # 默认的file pipeline
     'scrapy.pipelines.images.ImagesPipeline':2, # 默认的image pipeline
 }
+# CnblogMongoPipeline Settings
+MONGO_URI = 'mongodb://localhost:27017'
+MONGO_DATABASE = 'cnblog'
 # FilesPipeline Settings
 FILES_STORE = '.\\Files'
 FILES_URLS_FIELD = 'file_urls'

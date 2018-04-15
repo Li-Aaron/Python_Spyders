@@ -44,6 +44,7 @@ from scrapy.spiders import CrawlSpider
 from scrapy.spiders import Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
+from scrapy.loader.processors import TakeFirst, MapCompose, Join
 
 from cnblogSpider.items import CnblogspiderItem
 ##############################################
@@ -68,7 +69,7 @@ class CnblogsSpiderCrawl(CrawlSpider):
         # 下载allow匹配的链接，继续遍历下一个页面
         Rule(LinkExtractor(allow=("/qiyeboy/default.html\?page=\d{1,}",)),
              follow=True,
-             callback='parse_item_loader'
+             callback='parse_item'
         ),
     )
 
@@ -92,23 +93,6 @@ class CnblogsSpiderCrawl(CrawlSpider):
             request = scrapy.Request(url=url, callback=self.parse_body) # 解析正文
             request.meta['item'] = item # 将item用meta方式暂存 [meta:相关页面的元信息]
             yield request # 最后使用生成器方式提交
-
-    def parse_item_loader(self, response):
-        '''item loader 模式'''
-        item = self._parse_item_loader(response)
-        for url in item.get('url'):
-            request = scrapy.Request(url=url, callback=self.parse_body) # 解析正文
-            request.meta['item'] = item # 将item用meta方式暂存 [meta:相关页面的元信息]
-            yield request # 最后使用生成器方式提交
-
-    def _parse_item_loader(self, response):
-        l = ItemLoader(item=CnblogspiderItem(), response=response)
-        # xpath 方式提取（收集），一个字段可以用多个收集
-        l.add_xpath('url', ".//*[@class='postTitle']/a/@href")
-        l.add_xpath('time', ".//*[@class='postTitle']/a/text()")
-        l.add_xpath('title', ".//*[@class='dayTitle']/a/text()")
-        l.add_xpath('content', ".//*[@class='postCon']//text()")
-        return l.load_item()
 
 
     def parse_body(self, response):

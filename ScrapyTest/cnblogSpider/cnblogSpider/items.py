@@ -6,7 +6,8 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 
 import scrapy
-
+from scrapy.loader.processors import TakeFirst, Identity, MapCompose, Join
+from w3lib.html import remove_tags
 
 class CnblogspiderItem(scrapy.Item):
     # define the fields for your item here like:
@@ -23,4 +24,9 @@ class CnblogspiderItem(scrapy.Item):
     # file_urls = scrapy.Field()
 
 class newCnblogItem(CnblogspiderItem):
-    body = scrapy.Field()
+    time = scrapy.Field(
+        # 优先级高于default_input_processor
+        # 优先级低于field_in field_out字段
+        input_processor = MapCompose(lambda x:u'时间：'+x),
+        output_processor = TakeFirst(),
+    )

@@ -6,6 +6,7 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 import json,os
+import pymongo
 import scrapy
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exceptions import DropItem
@@ -37,6 +38,47 @@ class CnblogspiderPipeline(object):
     def write_file_as_json(self, content):
         content_line = json.dumps(dict(content)) + '\n'
         self.write_file(content_line)
+
+class CnblogMongoPipeline(object):
+    '''尝试open_spider, close_spider, from_crawler三个方法'''
+    collection_name = 'scrapy_items'
+    def __init__(self, mongo_uri, mongo_db):
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+
+    # classmethod 可以不用实例化 直接用类方法调用
+    @classmethod
+    def from_crawler(cls, crawler):
+        # 返回自身 生成实例
+        return cls(
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DATABASE','items'),
+        )
+
+    def open_spider(self, spider):
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+
+    def close_spider(self, spider):
+        self.client.close()
+
+    def process_item(self, item, spider):
+        '''核心'''
+        item_title = item['title']
+        if item_title:
+            collection = self.db[self.collection_name]
+            item_find = collection.find({'title': item_title})
+            if item_find.count():
+                # print 'found'
+                if item != item_find[0]:
+                    # print 'same'
+                    collection.update({'title': item_title}, {'$set': item})
+            else:
+                # print 'not found'
+                collection.insert(dict(item))
+            return item
+        else:
+            raise DropItem("Missing title in %s" % item)
 
 
 class CnblogspiderImagesPipeline(ImagesPipeline):
