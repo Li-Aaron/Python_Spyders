@@ -5,6 +5,6 @@ from cnblogSpider.spiders.cnblogs_spider import CnblogsSpider
 
 if __name__=='__main__':
     process = CrawlerProcess(get_project_settings())
-    process.crawl('cnblogs_itemloader')
-    # process.crawl('cnblogs_crawl')
+    # process.crawl('cnblogs_itemloader')
+    process.crawl('cnblogs_crawl')
     process.start()

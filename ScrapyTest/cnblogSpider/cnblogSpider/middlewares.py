@@ -6,8 +6,13 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import random
+from scrapy.http import Request
+from scrapy.utils.url import canonicalize_url
 
-
+########################################
+#----------SPIDER MIDDLEWARES----------#
+########################################
 class CnblogspiderSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
@@ -56,6 +61,21 @@ class CnblogspiderSpiderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
+class UrlCanonicalizerMiddleware(object):
+    def process_spider_output(self, response, result, spider):
+        # Must return an iterable of Request, dict or Item objects.
+        for r in result:
+            if isinstance(r, Request):
+                curl = canonicalize_url(r.url)
+                if curl != r.url:
+                    spider.logger.info('url = %s' % r.url)
+                    spider.logger.info('curl = %s' % curl)
+                    r = r.replace(url=curl)
+            yield r
+
+########################################
+#--------DOWNLOADER MIDDLEWARES--------#
+########################################
 class CnblogspiderDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -101,3 +121,56 @@ class CnblogspiderDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+class RandomUserAgent(object):
+    # Not all methods need to be defined. If a method is not defined,
+    # scrapy acts as if the downloader middleware does not modify the
+    # passed objects.
+
+    def __init__(self,agents):
+        self.agents = agents
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # This method is used by Scrapy to create your spiders.
+        return cls(crawler.settings.getlist('USER_AGENTS'))
+
+    def process_request(self, request, spider):
+        # Called for each request that goes through the downloader
+        # middleware.
+
+        # Must either:
+        # - return None: continue processing this request
+        # - or return a Response object
+        # - or return a Request object
+        # - or raise IgnoreRequest: process_exception() methods of
+        #   installed downloader middleware will be called
+        agent = random.choice(self.agents)
+        request.headers.setdefault('User-Agent', agent)
+        spider.logger.info('agent: %s' % agent)
+        return None
+
+class RandomProxy(object):
+
+    def __init__(self,iplist):#初始化一下数据库连接
+        self.iplist=iplist
+
+    @classmethod
+    def from_crawler(cls,crawler):
+        # This method is used by Scrapy to create your spiders.
+        return cls(crawler.settings.getlist('IPLIST'))
+
+    def process_request(self, request, spider):
+        # Called for each request that goes through the downloader
+        # middleware.
+
+        # Must either:
+        # - return None: continue processing this request
+        # - or return a Response object
+        # - or return a Request object
+        # - or raise IgnoreRequest: process_exception() methods of
+        #   installed downloader middleware will be called
+        proxy = random.choice(self.iplist)
+        spider.logger.info('proxy: %s' % proxy)
+        request.meta['proxy'] =proxy
+        return None
