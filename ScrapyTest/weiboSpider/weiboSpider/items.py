@@ -18,6 +18,8 @@ class UserInfoItem(scrapy.Item):
     pf_loc = scrapy.Field()         # 所在地
     pf_email = scrapy.Field()       # 邮箱
     pf_regdate = scrapy.Field()     # 注册时间
+    follows = scrapy.Field()        # 关注数
+    followers = scrapy.Field()      # 粉丝数
 
 class RelationItem(scrapy.Item):
     # define the fields for your item here like:

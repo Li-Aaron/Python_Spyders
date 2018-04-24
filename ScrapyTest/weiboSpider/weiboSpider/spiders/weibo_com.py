@@ -4,6 +4,8 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy import Selector
 from scrapy.http import Request, FormRequest
+from scrapy.shell import inspect_response
+from weiboSpider.items import UserInfoItem, RelationItem
 import time
 import rsa
 import binascii
@@ -38,21 +40,32 @@ def get_password(password, servertime, nonce, pubkey):
 class WeiboComSpider(CrawlSpider):
     name = 'weibo.com'
     allowed_domains = ['weibo.com','sina.com.cn']
-    start_urls = ['https://weibo.com/p/1005052259181527/info?mod=pedit_more']
+    start_urls = ['https://weibo.com/p/1005052259181527/info',
+                  # 'https://weibo.com/p/1005052259181527/follow',
+                  # 'https://weibo.com/p/1005052259181527/follow?relate=fans',
+                  ]
 
     rules = (
-        Rule(LinkExtractor(allow=r'Items/'), callback='parse_item', follow=True),
+        Rule(LinkExtractor(allow=('weibo.com/p/\d+/info',)), callback='parse_item', follow=True),
+        # Rule(LinkExtractor(allow=r'/follow'), callback='parse_item', follow=True),
+        # Rule(LinkExtractor(allow=r'/info'), callback='parse_item', follow=True),
     )
+
+    custom_settings = {
+        'DOWNLOADER_MIDDLEWARES': {
+            'weiboSpider.middlewares.RandomUserAgent': 450,
+        }
+    }
 
     phone = '15676371114'
     password = '49e7b513'
 
     def parse_item(self, response):
-        i = {}
-        #i['domain_id'] = response.xpath('//input[@id="sid"]/@value').extract()
-        #i['name'] = response.xpath('//div[@id="name"]').extract()
-        #i['description'] = response.xpath('//div[@id="description"]').extract()
-        return i
+        print response
+        weibo_item = UserInfoItem()
+        # inspect_response(response, self) # 中断并将response传入shell，Ctrl+D退出终端继续
+        self.logger.debug('weibo_item=%s' % weibo_item)
+        yield weibo_item
 
     def start_requests(self):
         # start from here (login)
@@ -65,9 +78,8 @@ class WeiboComSpider(CrawlSpider):
         request.meta['su'] = su  # 将su用meta方式暂存 [meta:相关页面的元信息]
         yield request  # 最后使用生成器方式提交
 
-
     def start_login(self, response):
-        # login func
+        # 登陆的处理
         # 准备数据
         sever_data = eval(response.text.replace("sinaSSOController.preloginCallBack", ''))
         self.logger.debug('sever_data=%s'%sever_data)
@@ -116,6 +128,7 @@ class WeiboComSpider(CrawlSpider):
 
     def start_login_jump(self, response):
         # 登陆跳转的处理
+        # inspect_response(response, self)  # 中断并将response传入shell，Ctrl+D退出终端继续
         # self.logger.debug('response=%s' % response.text)
         login_jump_url = Selector(response).re(r'location\.replace\([\'"](.*?)[\'"]\)')[0]
         self.logger.debug("login_jump_url=%s" % login_jump_url)

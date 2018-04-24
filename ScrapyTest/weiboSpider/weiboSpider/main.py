@@ -5,6 +5,6 @@ from weiboSpider.spiders.weibo_com import WeiboComSpider
 
 if __name__=='__main__':
     process = CrawlerProcess(get_project_settings())
-    # process.crawl('cnblogs_itemloader')
-    process.crawl('weibo.com')
+    process.crawl('weibo.com_PhantomJS')
+    # process.crawl('weibo.com')
     process.start()
