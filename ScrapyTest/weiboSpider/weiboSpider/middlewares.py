@@ -68,16 +68,23 @@ class RandomProxy(object):
 
 class PhantomJSMiddleware(object):
 
-    def __init__(self,agents):
+
+    def __init__(self, agents, username, password):
         self.agents = agents
-        # self.driver = webdriver.PhantomJS()
-        self.driver = webdriver.Chrome()
+        self.username = username
+        self.password = password
+        self.driver = webdriver.PhantomJS()
+        # self.driver = webdriver.Chrome()
+        self.driver.set_window_size(1366, 768)
 
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
         # 初始化实例
-        ext = cls(crawler.settings.getlist('USER_AGENTS'))
+        ext = cls(crawler.settings.getlist('USER_AGENTS'),
+                  crawler.settings.getlist('USERNAME'),
+                  crawler.settings.getlist('PASSWORD')
+                  )
         crawler.signals.connect(ext.spider_closed, signal=signals.spider_closed)
         return ext
 
@@ -100,8 +107,8 @@ class PhantomJSMiddleware(object):
             password = driver.find_element_by_xpath('.//*[@id="password"]')
             login_button = driver.find_element_by_xpath('//input[@type="submit"]')
 
-            username.send_keys("15676371114")
-            password.send_keys("49e7b513")
+            username.send_keys(self.username)
+            password.send_keys(self.password)
             login_button.click()
 
             time.sleep(3)
@@ -113,7 +120,7 @@ class PhantomJSMiddleware(object):
             spider.logger.info('process crawl: %s' % request.url)
             driver = self.driver
             driver.get(request.url)
-            time.sleep(3)
+            time.sleep(random.uniform(1,3))
             content = driver.page_source.encode('utf-8')
             # driver.quit()
             return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)
