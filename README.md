@@ -15,8 +15,8 @@
 [test/test_spider_qunar] 动态网页爬虫 (python+selenium+chrome)：去哪网  
 
 ## Scrapy实验  
-[ScrapyTest/cnblogSpider] 基础Scrapy爬虫 cnblog
-[ScrapyTest/weiboSpider] 第二个Scrapy爬虫 weibo
+[ScrapyTest/cnblogSpider] 基础Scrapy爬虫 cnblog  
+[ScrapyTest/weiboSpider] 第二个Scrapy爬虫 weibo [Scrapy+Selenium+PhantomJS+MongoDB]  
 
 ## 库内子工程
 [SpiderNovel] 静态网页小说下载  

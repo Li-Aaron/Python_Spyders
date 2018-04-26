@@ -107,9 +107,13 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'weiboSpider.pipelines.WeibospiderPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'weiboSpider.pipelines.MongoItemPipeline': 300,
+}
+# MongoItemPipeline Settings
+MONGO_URI = 'mongodb://localhost:27017'
+MONGO_DATABASE = 'weibo'
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -131,3 +135,13 @@ DOWNLOADER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# LOG setting
+LOG_FILE = 'weiboSpider.log'
+LOG_ENABLED = True
+LOG_ENCODING = 'utf-8'
+LOG_LEVEL = 'DEBUG'
+# LOG_FORMAT = '[%(asctime)s][%(name)s: %(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(levelname)s : %(message)s'
+LOG_FORMAT = '[%(asctime)s][%(name)s: %(funcName)s] %(levelname)s : %(message)s'
+LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_STDOUT = True

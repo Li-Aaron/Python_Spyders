@@ -68,7 +68,6 @@ class RandomProxy(object):
 
 class PhantomJSMiddleware(object):
 
-
     def __init__(self, agents, username, password):
         self.agents = agents
         self.username = username
