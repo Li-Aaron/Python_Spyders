@@ -15,8 +15,12 @@ SPIDER_MODULES = ['weiboSpider.spiders']
 NEWSPIDER_MODULE = 'weiboSpider.spiders'
 
 # for weibo login
-USERNAME = '15676371114'
-PASSWORD = '49e7b513'
+def load_user_info(filename):
+    with open(filename) as f:
+        username = f.readline().replace('\n','')
+        password = f.readline().replace('\n','')
+    return username, password
+USERNAME, PASSWORD = load_user_info('settings.txt')
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36'

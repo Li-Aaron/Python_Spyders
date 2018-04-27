@@ -40,8 +40,8 @@ if __name__ == '__main__':
     password = driver.find_element_by_xpath('.//*[@id="password"]')
     login_button = driver.find_element_by_xpath('//input[@type="submit"]')
 
-    username.send_keys("15676371114")
-    password.send_keys("49e7b513")
+    username.send_keys("*********")
+    password.send_keys("*********")
     login_button.click()
 
     time.sleep(2)

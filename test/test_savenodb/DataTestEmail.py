@@ -26,6 +26,11 @@ def _format_addr(s):
     name, addr = parseaddr(s)
     return formataddr((Header(name, 'utf-8').encode(), addr.encode('utf-8') if isinstance(addr, unicode) else addr))
 
+def load_user_info(filename):
+    with open(filename) as f:
+        username = f.readline().replace('\n', '')
+        password = f.readline().replace('\n', '')
+    return username, password
 ##############################################
 # ------------------类定义--------------------#
 ##############################################
@@ -38,8 +43,7 @@ if __name__ == '__main__':
     err = 'WTF!'
 
     # email
-    from_addr = 'lsp_python@yeah.net'
-    password = '139849e7b513a738'
+    from_addr, password = load_user_info('setting.txt')
     to_addr = 'ac2sherry@126.com'
     smtp_server = 'smtp.yeah.net'
 
