@@ -17,6 +17,7 @@
 ## Scrapy实验  
 [ScrapyTest/cnblogSpider] 基础Scrapy爬虫 cnblog  
 [ScrapyTest/weiboSpider] 第二个Scrapy爬虫 weibo [Scrapy+Selenium+PhantomJS+MongoDB]  
+[ScrapyTest/weiboSpider2] 第二个Scrapy爬虫改进版 weibo 通过Gephi画1度联系人之间关系  
 
 ## 库内子工程
 [SpiderNovel] 静态网页小说下载  
