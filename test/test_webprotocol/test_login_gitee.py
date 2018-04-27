@@ -24,8 +24,13 @@ agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:46.0) Gecko/20100101 Firef
 headers = {
     'User-Agent': agent,
 }
-username = 'lsp_python@yeah.net'
-password = '139849e7b513a738'
+def load_user_info(filename):
+    with open(filename) as f:
+        username = f.readline().replace('\n', '')
+        password = f.readline().replace('\n', '')
+    return username, password
+
+username, password = load_user_info('settings_gitee.txt')
 ##############################################
 #------------------函数定义------------------#
 ##############################################

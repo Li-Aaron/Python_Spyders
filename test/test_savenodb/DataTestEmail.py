@@ -43,7 +43,7 @@ if __name__ == '__main__':
     err = 'WTF!'
 
     # email
-    from_addr, password = load_user_info('setting.txt')
+    from_addr, password = load_user_info('settings_gitee.txt')
     to_addr = 'ac2sherry@126.com'
     smtp_server = 'smtp.yeah.net'
 
