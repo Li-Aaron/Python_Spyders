@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import scrapy
+# import scrapy
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy import Request, FormRequest
@@ -8,15 +8,14 @@ from scrapy import Selector
 from scrapy.http import HtmlResponse
 import re
 
-from vkSpider.items import AlbumItem
+from vkSpider.items import AlbumItem, PhotoItem
 
 class VkSpider(CrawlSpider):
     name = 'vk'
     allowed_domains = ['vk.com']
 
     rules = (
-        # Rule(LinkExtractor(allow=r'login'), callback='parse_login', follow=True),
-        Rule(LinkExtractor(allow=r'albums'), callback='parse_album', follow=True),
+        Rule(LinkExtractor(allow=r'vk.com/albums'), callback='parse_album', follow=True),
     )
     username = ''
     password = ''
@@ -24,12 +23,15 @@ class VkSpider(CrawlSpider):
     ########################################
     #-------------ALBUM METHODS------------#
     ########################################
+
     def parse_album(self, response):
         # 响应Cookie
-        Cookie2 = response.headers.getlist('Set-Cookie')
-        self.logger.debug('response cookies=\n%s' % Cookie2)
+        # Cookie2 = response.headers.getlist('Set-Cookie')
+        # self.logger.debug('response cookies=\n%s' % Cookie2)
+        self.logger.debug('parsing url: %s' % response.url)
         album_num = response.xpath('//span[@class="ui_crumb_count"]/text()').extract_first()
-        album_offsets = range(0,int(album_num),24) # vk 一次动态加载24个album
+        # vk 一次动态加载24个album
+        album_offsets = range(0,int(album_num),24)
         for album_offset in album_offsets:
             postdata = {
                 'al': '1',
@@ -56,12 +58,82 @@ class VkSpider(CrawlSpider):
         titles = title_pattern.findall(response.text)
         album_img_pattern = re.compile(r'style="background-image: url\((.*?)\)')
         album_imgs = album_img_pattern.findall(response.text)
+        id_pattern = re.compile(r'/album-\d+_(\d+)')
+        user_id_pattern = re.compile(r'/album-(\d+)_\d+')
         for url, title, album_img in zip(urls, titles, album_imgs):
-            album_item = AlbumItem()
-            album_item['url'] = url
-            album_item['title'] = title
-            album_item['album_img'] = album_img
-            yield album_item
+            if id_pattern.search(url):
+                # 存在没有id的相册?
+                album_item = AlbumItem()
+                url = response.urljoin(url)
+                album_item['url'] = url
+                album_item['id'] = id_pattern.search(url).group(1)
+                album_item['user_id'] = user_id_pattern.search(url).group(1)
+                album_item['title'] = title
+                album_item['image_url'] = album_img
+                yield album_item
+
+                request = Request(url, callback=self.parse_photo)
+                request.meta['album_id'] = album_item['id']
+                request.meta['album_title'] = album_item['title']
+                request.meta['user_id'] = album_item['user_id']
+                request.meta['cookiejar'] = True
+                yield request
+
+    def parse_photo(self, response):
+        # inspect_response(response, self)  # 中断并将response传入shell，Ctrl+D退出终端继续
+        photo_num = response.xpath('//span[@class="ui_crumb_count"]/text()').extract_first()
+        # vk 一次动态加载40个photo
+        photo_offsets = range(0,int(photo_num),40)
+        for photo_offset in photo_offsets:
+            postdata = {
+                'al': '1',
+                'al_ad' : '0',
+                'offset' : str(photo_offset),
+                'part' : '1',
+                'rev' : '',
+            }
+            request = FormRequest(response.url,
+                                  method='POST',
+                                  formdata=postdata,
+                                  meta={'cookiejar': response.meta['cookiejar'],
+                                        'postdata':postdata},
+                                  callback=self.parse_photo_full,
+                                  dont_filter=True
+                                  )
+            request.meta['album_id'] = response.meta['album_id']
+            request.meta['album_title'] = response.meta['album_title']
+            request.meta['user_id'] = response.meta['user_id']
+            yield request
+
+    def parse_photo_full(self, response):
+        # inspect_response(response, self)  # 中断并将response传入shell，Ctrl+D退出终端继续
+        # fixme: 这里使用re库是因为response回传是一个注释，如何用Selector解析？
+        url_pattern = re.compile(r'<a href="(.*?)"')
+        urls = url_pattern.findall(response.text)
+        id_pattern = re.compile(r'/photo-\d+_(\d+)')
+        for url in urls:
+            if id_pattern.search(url):
+                request = Request(response.urljoin(url), callback=self.parse_photo_page)
+                request.meta['album_id'] = response.meta['album_id']
+                request.meta['album_title'] = response.meta['album_title']
+                request.meta['user_id'] = response.meta['user_id']
+                request.meta['cookiejar'] = True
+                request.meta['use_selenium'] = True
+                request.meta['get_photo'] = True # 用selenium组件直接爬取下载url
+                request.meta['photo_id'] = id_pattern.search(url).group(1)
+                yield request
+
+    def parse_photo_page(self, response):
+        # inspect_response(response, self)  # 中断并将response传入shell，Ctrl+D退出终端继续
+        # fixme: 虽然是用了selenium 感觉还是不对
+        img_url = response.text
+        photo_item = PhotoItem()
+        photo_item['image_url'] = img_url
+        photo_item['id'] = response.meta['photo_id']
+        photo_item['album_id'] = response.meta['album_id']
+        photo_item['user_id'] = response.meta['user_id']
+        photo_item['album_title'] = response.meta['album_title']
+        yield photo_item
 
     ########################################
     #-------------LOGIN METHODS------------#
@@ -124,7 +196,6 @@ class VkSpider(CrawlSpider):
                               # callback=self.parse_album,
                               )
 
-
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(CrawlSpider, cls).from_crawler(crawler, *args, **kwargs)
@@ -134,7 +205,7 @@ class VkSpider(CrawlSpider):
         spider.password = crawler.settings.get('PASSWORD')
         spider.start_urls = crawler.settings.getlist('ALBUM_URLS')
         # print spider.username,spider.password
-        print spider.start_urls
+        # print spider.start_urls
         return spider
 
     def _requests_to_follow(self, response):
@@ -151,3 +222,4 @@ class VkSpider(CrawlSpider):
                 r = self._build_request(n, link)
                 r.meta['cookiejar'] = True # 为了传cookie
                 yield rule.process_request(r)
+

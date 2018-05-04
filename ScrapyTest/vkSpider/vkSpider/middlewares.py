@@ -5,7 +5,11 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-import random
+from scrapy import signals
+import random, time
+from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
+from scrapy.http import HtmlResponse
 
 ########################################
 #--------DOWNLOADER MIDDLEWARES--------#
@@ -35,7 +39,7 @@ class RandomUserAgent(object):
         #   installed downloader middleware will be called
         agent = random.choice(self.agents)
         request.headers.setdefault('User-Agent', agent)
-        spider.logger.info('agent: %s' % agent)
+        spider.logger.debug('agent: %s' % agent)
         return None
 
 class RandomProxy(object):
@@ -75,5 +79,82 @@ class FixedProxy(object):
     def process_request(self, request, spider):
         # Set the location of the proxy
         request.meta['proxy'] = self.proxy
-        spider.logger.info('proxy: %s' % self.proxy)
+        spider.logger.debug('proxy: %s' % self.proxy)
         return None
+
+
+
+class PhantomJSMiddleware(object):
+
+    def __init__(self, agents, username, password):
+        self.agents = agents
+        self.username = username
+        self.password = password
+        self.driver = webdriver.Chrome()
+        # self.driver = webdriver.Chrome()
+        self.driver.set_window_size(1024, 600)
+        self.login()
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # This method is used by Scrapy to create your spiders.
+        # 初始化实例
+        ext = cls(crawler.settings.getlist('USER_AGENTS'),
+                  crawler.settings.get('USERNAME'),
+                  crawler.settings.get('PASSWORD')
+                  )
+        crawler.signals.connect(ext.spider_closed, signal=signals.spider_closed)
+        return ext
+
+    def spider_closed(self, spider):
+        self.driver.quit()
+
+    def login(self):
+        # login
+        agent = random.choice(self.agents)
+        dcap = dict(DesiredCapabilities.PHANTOMJS)
+        dcap["phantomjs.page.settings.userAgent"] = agent
+        # login url
+        url = 'https://vk.com/login'
+        driver = self.driver
+        driver.get(url)
+        time.sleep(1)
+        # login actions
+        username = driver.find_element_by_xpath('.//*[@id="email"]')
+        password = driver.find_element_by_xpath('.//*[@id="pass"]')
+        login_button = driver.find_element_by_xpath('//*[@id="login_button"]')
+        username.send_keys(self.username)
+        password.send_keys(self.password)
+        login_button.click()
+
+    def process_request(self, request, spider):
+        '''return a Response object'''
+        agent = random.choice(self.agents)
+        dcap = dict(DesiredCapabilities.PHANTOMJS)
+        dcap["phantomjs.page.settings.userAgent"] = agent
+
+        if request.meta.has_key('use_selenium'):
+            if request.meta.has_key('get_photo'):
+                # 需要selenium代解析的动态网页（下载照片）
+                spider.logger.info('process crawl: %s' % request.url)
+                spider.logger.debug('meta: %s' % request.meta)
+                driver = self.driver
+                driver.get(request.url)
+                time.sleep(random.uniform(1,3))
+                # 这里要点击一下more的按钮
+                more_button = driver.find_element_by_xpath('//a[@class="pv_actions_more"]')
+                more_button.click()
+                time.sleep(1)
+                photo_url = driver.find_element_by_xpath('//a[@id="pv_more_act_download"]')
+                content = photo_url.get_attribute('href').encode('utf-8')
+                return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)
+
+            elif request.meta['use_selenium'] == True:
+                # 一般动态网页 直接回传
+                spider.logger.info('process crawl: %s' % request.url)
+                spider.logger.debug('meta: %s' % request.meta)
+                driver = self.driver
+                driver.get(request.url)
+                time.sleep(random.uniform(1,3))
+                content = driver.page_source.encode('utf-8')
+                return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)

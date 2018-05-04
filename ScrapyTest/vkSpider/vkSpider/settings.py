@@ -76,6 +76,7 @@ DOWNLOADER_MIDDLEWARES = {
     'vkSpider.middlewares.RandomUserAgent': 450,
     # 'vkSpider.middlewares.RandomProxy': 460,
     'vkSpider.middlewares.FixedProxy': 460,
+    'vkSpider.middlewares.PhantomJSMiddleware': 470,
 }
 PROXY = 'http://127.0.0.1:3213'
 
@@ -87,9 +88,17 @@ PROXY = 'http://127.0.0.1:3213'
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'vkSpider.pipelines.VkspiderPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'vkSpider.pipelines.VkSpiderPipeline': 300,
+    'vkSpider.pipelines.VkImagesPipeline': 200,
+}
+# MongoItemPipeline Settings
+MONGO_URI = 'mongodb://localhost:27017'
+MONGO_DATABASE = 'vk'
+# ImagesPipeline Settings
+IMAGES_STORE = '.\\Images'
+IMAGES_URLS_FIELD = 'image_url'
+IMAGES_RESULT_FIELD = 'images'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -117,7 +126,7 @@ PROXY = 'http://127.0.0.1:3213'
 # LOG_FILE = 'vk.log'
 LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
-# LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'INFO'
 # # LOG_FORMAT = '[%(asctime)s][%(name)s: %(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(levelname)s : %(message)s'
 LOG_FORMAT = '[%(asctime)s][%(name)s: %(funcName)s] %(levelname)s : %(message)s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
