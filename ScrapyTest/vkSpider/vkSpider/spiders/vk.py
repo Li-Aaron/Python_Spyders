@@ -6,7 +6,7 @@ from scrapy import Request, FormRequest
 from scrapy.shell import inspect_response
 from scrapy import Selector
 from scrapy.http import HtmlResponse
-import re
+import HTMLParser, re
 
 from vkSpider.items import AlbumItem, PhotoItem
 
@@ -19,6 +19,17 @@ class VkSpider(CrawlSpider):
     )
     username = ''
     password = ''
+
+    ########################################
+    #------------NORMAL METHODS------------#
+    ########################################
+    def get_title(self, album_title):
+        # title的处理
+        html_parser = HTMLParser.HTMLParser()
+        ret = html_parser.unescape(album_title) # 去html字符
+        ret = re.sub(r'[<>/\\\?\*:]','',ret) # 去目录不能存在的标点
+        ret = ret.strip(' ') # 去首尾空格
+        return ret
 
     ########################################
     #-------------ALBUM METHODS------------#
@@ -52,23 +63,29 @@ class VkSpider(CrawlSpider):
     def parse_album_full(self, response):
         # inspect_response(response, self)  # 中断并将response传入shell，Ctrl+D退出终端继续
         # fixme: 这里使用re库是因为response回传是一个注释，如何用Selector解析？
-        url_pattern = re.compile(r'<a href="(.*?)"')
+        # level 1 patterns
+        url_pattern = re.compile(r'<a href="(.*?)"') # album url
+        title_pattern = re.compile(r'div class="photos_album_title ge_photos_album" title="(.*?)"') # album title
+        album_img_pattern = re.compile(r'style="background-image: url\((.*?)\)') # album img
+
         urls = url_pattern.findall(response.text)
-        title_pattern = re.compile(r'div class="photos_album_title ge_photos_album" title="(.*?)"')
         titles = title_pattern.findall(response.text)
-        album_img_pattern = re.compile(r'style="background-image: url\((.*?)\)')
         album_imgs = album_img_pattern.findall(response.text)
-        id_pattern = re.compile(r'/album-\d+_(\d+)')
-        user_id_pattern = re.compile(r'/album-(\d+)_\d+')
+
+        # level 2 patterns
+        id_pattern = re.compile(r'/album-\d+_(\d+)') # album id
+        user_id_pattern = re.compile(r'/album-(\d+)_\d+') # user id
+        not_album_pattern = re.compile(r'camera') # 这个为了过滤掉上传的那个空相册
+
         for url, title, album_img in zip(urls, titles, album_imgs):
-            if id_pattern.search(url):
-                # 存在没有id的相册?
+            if id_pattern.search(url) and not not_album_pattern.search(album_img):
+                # 相册地址合法且不是空的那个
                 album_item = AlbumItem()
                 url = response.urljoin(url)
                 album_item['url'] = url
                 album_item['id'] = id_pattern.search(url).group(1)
                 album_item['user_id'] = user_id_pattern.search(url).group(1)
-                album_item['title'] = title
+                album_item['title'] = self.get_title(title)
                 album_item['image_url'] = album_img
                 yield album_item
 
@@ -79,6 +96,9 @@ class VkSpider(CrawlSpider):
                 request.meta['cookiejar'] = True
                 yield request
 
+    ########################################
+    #-------------PHOTO METHODS------------#
+    ########################################
     def parse_photo(self, response):
         # inspect_response(response, self)  # 中断并将response传入shell，Ctrl+D退出终端继续
         photo_num = response.xpath('//span[@class="ui_crumb_count"]/text()').extract_first()

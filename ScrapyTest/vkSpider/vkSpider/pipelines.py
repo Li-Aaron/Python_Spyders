@@ -5,11 +5,11 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import pymongo
-import scrapy
 # from scrapy.http import Request
 from scrapy.exceptions import DropItem
 from vkSpider.items import *
 from scrapy.pipelines.images import ImagesPipeline
+
 
 class VkSpiderPipeline(object):
     def __init__(self, mongo_uri, mongo_db):
@@ -50,11 +50,12 @@ class VkSpiderPipeline(object):
         if item_find.count():
             if item != item_find[0]:
                 collection.update({'id':item['id']},{'$set':item})
-                spider.logger.info('Updated id: %s'%item['id'])
+                spider.logger.info('[ALBUM] Updated id: %s, title: %s'%(item['id'], item['title']))
             else:
-                spider.logger.debug('Duplicated id: %s' % item['id'])
+                spider.logger.debug('[ALBUM] Duplicated id: %s, title: %s'%(item['id'], item['title']))
         else:
             collection.insert(dict(item))
+            spider.logger.info('[ALBUM] Crawled id: %s, title: %s' % (item['id'], item['title']))
 
 
     def _process_photo_item(self, item, spider):
@@ -63,8 +64,9 @@ class VkSpiderPipeline(object):
         item_find = collection.find_one(item)
         if not item_find:
             collection.insert(dict(item))
+            spider.logger.info('[PHOTO] Crawled album_title: %s, id: %s' % (item['album_title'], item['id']))
         else:
-            spider.logger.debug('Duplicated photo: \n%s' % item)
+            spider.logger.debug('[PHOTO] Duplicated album_title: %s, id: %s' % (item['album_title'], item['id']))
 
 
 
@@ -93,4 +95,5 @@ class VkImagesPipeline(ImagesPipeline):
         user_id = request.meta['user_id']
         album_title = request.meta['album_title']
         image_id = request.meta['image_id']
+
         return '%s/%s/%s.jpg' % (user_id, album_title, image_id)

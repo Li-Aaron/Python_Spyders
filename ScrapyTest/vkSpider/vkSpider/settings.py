@@ -33,7 +33,11 @@ ALBUM_URLS = album_parse(conf.get('urls','album'))
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'vkSpider (+http://www.yourdomain.com)'
 USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:46.0) Gecko/20100101 Firefox/46.0',
+    # 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:46.0) Gecko/20100101 Firefox/46.0', # Firefox Windows
+    # 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:46.0) Gecko/20100101 Firefox/46.0', # Firefox Windows
+    'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36', # Chrome Windows
+    # 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240' # Edge Windows
+    # 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B137 Safari/601.1' # Safari Iphone
 ]
 
 # Obey robots.txt rules
@@ -76,15 +80,19 @@ DOWNLOADER_MIDDLEWARES = {
     'vkSpider.middlewares.RandomUserAgent': 450,
     # 'vkSpider.middlewares.RandomProxy': 460,
     'vkSpider.middlewares.FixedProxy': 460,
-    'vkSpider.middlewares.PhantomJSMiddleware': 470,
+    'vkSpider.middlewares.ChromeMiddleware': 470,
 }
 PROXY = 'http://127.0.0.1:3213'
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+    # 'scrapy.extensions.telnet.TelnetConsole': None,
+    'vkSpider.extensions.SpiderStatus': 0,
+}
+MYEXT_ENABLED = True
+MYEXT_ITEMCOUNT = 100
+
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
@@ -123,11 +131,11 @@ IMAGES_RESULT_FIELD = 'images'
 
 
 # LOG setting
-# LOG_FILE = 'vk.log'
+LOG_FILE = 'vk.log'
 LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_LEVEL = 'INFO'
-# # LOG_FORMAT = '[%(asctime)s][%(name)s: %(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(levelname)s : %(message)s'
+# LOG_FORMAT = '[%(asctime)s][%(name)s: %(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(levelname)s : %(message)s'
 LOG_FORMAT = '[%(asctime)s][%(name)s: %(funcName)s] %(levelname)s : %(message)s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 # LOG_STDOUT = True

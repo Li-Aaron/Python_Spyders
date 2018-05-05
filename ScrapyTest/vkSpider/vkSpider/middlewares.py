@@ -4,12 +4,13 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import random, time
 
 from scrapy import signals
-import random, time
-from selenium import webdriver
-from selenium.webdriver import DesiredCapabilities
 from scrapy.http import HtmlResponse
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 ########################################
 #--------DOWNLOADER MIDDLEWARES--------#
@@ -82,16 +83,16 @@ class FixedProxy(object):
         spider.logger.debug('proxy: %s' % self.proxy)
         return None
 
-
-
-class PhantomJSMiddleware(object):
-
+class ChromeMiddleware(object):
     def __init__(self, agents, username, password):
         self.agents = agents
         self.username = username
         self.password = password
-        self.driver = webdriver.Chrome()
-        # self.driver = webdriver.Chrome()
+        # chrome headless (better than phantomjs)
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        self.driver = webdriver.Chrome(chrome_options=chrome_options)
+        # self.driver = webdriver.Chrome() # debug usage
         self.driver.set_window_size(1024, 600)
         self.login()
 
@@ -110,10 +111,6 @@ class PhantomJSMiddleware(object):
         self.driver.quit()
 
     def login(self):
-        # login
-        agent = random.choice(self.agents)
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = agent
         # login url
         url = 'https://vk.com/login'
         driver = self.driver
@@ -129,9 +126,6 @@ class PhantomJSMiddleware(object):
 
     def process_request(self, request, spider):
         '''return a Response object'''
-        agent = random.choice(self.agents)
-        dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = agent
 
         if request.meta.has_key('use_selenium'):
             if request.meta.has_key('get_photo'):
@@ -140,7 +134,7 @@ class PhantomJSMiddleware(object):
                 spider.logger.debug('meta: %s' % request.meta)
                 driver = self.driver
                 driver.get(request.url)
-                time.sleep(random.uniform(1,3))
+                time.sleep(random.uniform(1,2))
                 # 这里要点击一下more的按钮
                 more_button = driver.find_element_by_xpath('//a[@class="pv_actions_more"]')
                 more_button.click()
