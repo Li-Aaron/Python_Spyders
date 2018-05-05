@@ -70,9 +70,9 @@ COOKIES_ENABLED = True
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'vkSpider.middlewares.VkspiderSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'vkSpider.middlewares.PhotoFilter': 100,
+}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -136,6 +136,6 @@ LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_LEVEL = 'INFO'
 # LOG_FORMAT = '[%(asctime)s][%(name)s: %(processName)s(%(process)s): %(threadName)s: %(funcName)s] %(levelname)s : %(message)s'
-LOG_FORMAT = '[%(asctime)s][%(name)s: %(funcName)s] %(levelname)s : %(message)s'
+LOG_FORMAT = '[%(asctime)s][%(name)s: %(filename)s-%(funcName)s] %(levelname)s : %(message)s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 # LOG_STDOUT = True

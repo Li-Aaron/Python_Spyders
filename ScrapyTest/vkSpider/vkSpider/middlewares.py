@@ -5,8 +5,9 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import random, time
-
+import pymongo
 from scrapy import signals
+from scrapy import Request
 from scrapy.http import HtmlResponse
 
 from selenium import webdriver
@@ -152,3 +153,56 @@ class ChromeMiddleware(object):
                 time.sleep(random.uniform(1,3))
                 content = driver.page_source.encode('utf-8')
                 return HtmlResponse(request.url, encoding='utf-8', body=content, request=request)
+
+
+########################################
+#----------SPIDER MIDDLEWARES----------#
+########################################
+class PhotoFilter(object):
+    def __init__(self, mongo_uri, mongo_db):
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        s = cls(
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DATABASE','items'),
+        )
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        crawler.signals.connect(s.spider_closed, signal=signals.spider_closed)
+        return s
+
+    def process_spider_output(self, response, result, spider):
+        # Called with the results returned from the Spider, after
+        # it has processed the response.
+
+        # Must return an iterable of Request, dict or Item objects.
+        for i in result:
+            if isinstance(i,Request):
+            # 输出迭代器中有可能是Request 有可能是Item
+                request = i
+                # photo
+                if request.meta.has_key('get_photo'):
+                    # 当前id检索看是否存储过
+                    s = self.collection.find_one({'id': request.meta['photo_id']})
+                    # 是否成功下载
+                    im_result = s['images'] if s else []
+                    if im_result:
+                        spider.logger.info('[PHOTO] Already Downloaded album_title: %s, id: %s' %
+                                           (request.meta['album_title'], request.meta['photo_id']))
+                    else:
+                        yield request
+                else:
+                    yield request
+            else:
+                # item
+                yield i
+
+    def spider_opened(self, spider):
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+        self.collection = self.db['Photo']
+
+    def spider_closed(self, spider):
+        self.client.close()
