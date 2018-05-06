@@ -1,0 +1,11 @@
+# python Compiled Files
+*.pyc
+*.exe
+*.msi
+
+# PyCharm Prj Files
+misc.xml
+modules.xml
+*.iml
+vcs.xml
+workspace.xml
