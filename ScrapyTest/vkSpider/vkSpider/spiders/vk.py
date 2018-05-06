@@ -41,6 +41,7 @@ class VkSpider(CrawlSpider):
         # self.logger.debug('response cookies=\n%s' % Cookie2)
         self.logger.debug('parsing url: %s' % response.url)
         album_num = response.xpath('//span[@class="ui_crumb_count"]/text()').extract_first()
+        album_num = re.sub(',','',album_num) # 去掉中间的逗号
         # vk 一次动态加载24个album
         album_offsets = range(0,int(album_num),24)
         for album_offset in album_offsets:

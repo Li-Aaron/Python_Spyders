@@ -184,8 +184,8 @@ class PhotoFilter(object):
                 request = i
                 # photo
                 if request.meta.has_key('get_photo'):
-                    # 当前id检索看是否存储过
-                    s = self.collection.find_one({'id': request.meta['photo_id']})
+                    # 当前id检索看是否存储过, 以及album_title是否正确
+                    s = self.collection.find_one({'id': request.meta['photo_id'], 'album_title': request.meta['album_title']})
                     # 是否成功下载
                     im_result = s['images'] if s else []
                     if im_result:
