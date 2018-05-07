@@ -50,6 +50,7 @@ class VkSpiderPipeline(object):
         if item_find.count():
             if item != item_find[0]:
                 collection.update({'id':item['id']},{'$set':item})
+                # 每次下载完封面图片都会更新内容，所以肯定会update
                 spider.logger.info('[ALBUM] Updated id: %s, title: %s'%(item['id'], item['title']))
             else:
                 spider.logger.debug('[ALBUM] Duplicated id: %s, title: %s'%(item['id'], item['title']))
