@@ -9,6 +9,7 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 import ConfigParser
+import time
 
 BOT_NAME = 'vkSpider'
 
@@ -131,7 +132,7 @@ IMAGES_RESULT_FIELD = 'images'
 
 
 # LOG setting
-LOG_FILE = 'vk.log'
+LOG_FILE = 'log/vk_%s.log'%time.strftime('%Y%m%d_%H%M%S')
 LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_LEVEL = 'INFO'

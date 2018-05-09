@@ -12,7 +12,12 @@ from scrapy.http import HtmlResponse
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
+import logging
+logger = logging.getLogger(__name__)
 ########################################
 #--------DOWNLOADER MIDDLEWARES--------#
 ########################################
@@ -124,6 +129,16 @@ class ChromeMiddleware(object):
         username.send_keys(self.username)
         password.send_keys(self.password)
         login_button.click()
+
+        try:
+            userinfo = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, "top_profile_name"))
+            )
+            logger.info('[Selenium Login Success] USERNAME: %s' % userinfo.text)
+        except Exception:
+            logger.error('[Selenium Login Failed]')
+            raise Exception('[Selenium Login Failed]')
+
 
     def process_request(self, request, spider):
         '''return a Response object'''
