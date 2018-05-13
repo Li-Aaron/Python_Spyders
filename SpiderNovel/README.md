@@ -1,8 +1,8 @@
 # SpiderNovel
 下小说的爬虫脚本  
-调用方法 python nodownloader.py http_url [chapter]
-http_url：小说目录页
-chapter：续下用，默认为1
+调用方法 python nodownloader.py http_url [chapter]  
+http_url：小说目录页  
+chapter：续下用，默认为1  
 
 ## 更新日志：
  
