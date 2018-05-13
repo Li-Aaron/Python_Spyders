@@ -12,7 +12,9 @@ __author__ = 'AC'
 import urllib2
 from bs4 import BeautifulSoup
 import re
-import sys
+import sys, os
+import urlparse
+import HTMLParser
 
 ##############################################
 #------------------常量定义------------------#
@@ -33,12 +35,15 @@ class NovelDownloader(object):
 
     novel = {}
     fileName = 'Novel.txt'
+    fileRoot = r'.\novel'
+    startChap = 1
 
     def __init__(self, url):
         if not isinstance(url, (str)):
             raise TypeError('url mast be string')
         self.webPageUrl = url
         self.novelListHtml = self.OpenWebPage(self.webPageUrl)
+        self.SetPath(self.fileRoot)
 
     def OpenWebPage(self, url):
         '''
@@ -88,6 +93,8 @@ class NovelDownloader(object):
         ret = re.sub(u'\n{2,}', EOL, ret)
         #remove &amp;lt;u&amp;gt
         ret = re.sub(u'(u?&amp|\blt\b|\bgt\b);?','',ret)
+        htmlParset = HTMLParser.HTMLParser()
+        ret = htmlParset.unescape(ret)
         return ret
 
     def GetNovelList(self):
@@ -101,7 +108,8 @@ class NovelDownloader(object):
         soup = BeautifulSoup(html_str, 'lxml', from_encoding='utf-8')
         # print soup.title.string
         self.novel = self.GetNovelListDispatch(soup)
-        self.fileName = self.novel['Title'] + u".txt"
+        chap_file = '_%s'% (self.startChap,) if self.startChap != 1 else ''
+        self.fileName = os.path.join(self.fileRoot, u"%s%s.txt"%(self.novel['Title'], chap_file))
 
 
     def GetNovelListDispatch(self, soup):
@@ -161,7 +169,7 @@ class NovelDownloader(object):
         return title, text
 
     def NovelUrlComb(self, novelUrl):
-        return self.webPageUrl + novelUrl
+        return urlparse.urljoin(self.webPageUrl, novelUrl)
 
     def SaveNovelTitle(self):
         '''
@@ -176,11 +184,12 @@ class NovelDownloader(object):
         novelTxt += self.webPageUrl + EOL.encode('utf-8') + EOL.encode('utf-8')
         self.SaveToFile(novelTxt)
 
-    def GetNovel(self, startChap = 0):
+    def GetNovel(self, startChap = 1):
         '''
         DownLoad Text Start
         :return:
         '''
+        self.startChap = startChap
         self.GetNovelList()
         print self.novel['Title']
         # get novel
@@ -188,14 +197,19 @@ class NovelDownloader(object):
 
         numIdx = startChap
         numChapter = len(self.novel['UrlList'])
-        for novelUrl in self.novel['UrlList'][startChap:]:
-            numIdx += 1
+        for novelUrl in self.novel['UrlList'][startChap-1:]:
             print "[%4.3f%%] %5d of %5d is done ..." % (100.0 * numIdx / numChapter, numIdx, numChapter)
+            numIdx += 1
             textUrl = self.NovelUrlComb(novelUrl)
             chapterText = self.GetNovelTextFromUrl(textUrl).encode('utf-8')
             self.SaveToFile(chapterText, attr='a+')
 
         print '[Process Done]'
+
+    def SetPath(self, fileRoot):
+        self.fileRoot = fileRoot
+        if not os.path.exists(fileRoot):
+            os.mkdir(fileRoot)
 
 ##############################################
 #------------------脚本开始------------------#
@@ -203,14 +217,14 @@ class NovelDownloader(object):
 if __name__ == '__main__':
     # argv check
     webPageUrl = URL
-    startChap = 0
+    startChap = 1
     if len(sys.argv) < 2:
         print 'For debug usage!'
     elif len(sys.argv) == 2:
         webPageUrl = str(sys.argv[1])
     elif len(sys.argv) == 3:
         webPageUrl = str(sys.argv[1])
-        startChap = int(sys.argv[2]) - 1
+        startChap = int(sys.argv[2])
     else:
         raise Exception("too many input parameters (>2)")
 

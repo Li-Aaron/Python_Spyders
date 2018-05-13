@@ -11,7 +11,7 @@ __author__ = 'AC'
 ##############################################
 import re
 import sys
-from SpiNovel import NovelDownloader, NovelDownloaderMulti, NovelDownloaderGev
+from SpiNovel import NovelDownloaderGev
 
 ##############################################
 #------------------常量定义------------------#
@@ -27,7 +27,7 @@ EOL = u'\n'
 ##############################################
 #------------------类定义--------------------#
 ##############################################
-class NovelDownloader_Biquwu(NovelDownloader):
+class NovelDownloader_Biquwu(NovelDownloaderGev):
 
     rootUrl = 'http://www.ucxiaoshuo.com'
 
@@ -70,14 +70,6 @@ class NovelDownloader_Biquwu(NovelDownloader):
 
         return title, text
 
-    def NovelUrlComb(self, novelUrl):
-        return self.rootUrl + novelUrl
-
-class NovelDownloader_BiquwuMulti(NovelDownloaderMulti,NovelDownloader_Biquwu):
-    pass
-
-class NovelDownloader_BiquwuGev(NovelDownloaderGev,NovelDownloader_Biquwu):
-    pass
 
 
 ##############################################
@@ -100,5 +92,5 @@ if __name__ == '__main__':
     if startChap < 1:
         raise ValueError("startChap must larger than 1")
 
-    novelDL = NovelDownloader_BiquwuGev(webPageUrl)
+    novelDL = NovelDownloader_Biquwu(webPageUrl)
     novelDL.GetNovel(startChap)

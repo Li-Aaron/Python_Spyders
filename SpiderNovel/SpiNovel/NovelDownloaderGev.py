@@ -111,6 +111,7 @@ class NovelDownloaderGev(NovelDownloader):
         DownLoad Text Start (using Multitask)
         :return:
         '''
+        self.startChap = startChap
         self.GetNovelList()
         print self.novel['Title']
         # get novel
@@ -123,7 +124,6 @@ class NovelDownloaderGev(NovelDownloader):
         with open(pickleFile, 'w') as f:
             pickle.dump(self.novel['UrlList'], f)
         self.novel = {}
-        self.startChap = startChap
         self.idxValue = startChap
         self.idxMax = numChapter
 

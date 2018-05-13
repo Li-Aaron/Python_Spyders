@@ -11,7 +11,7 @@ __author__ = 'AC'
 ##############################################
 import re
 import sys
-from SpiNovel import NovelDownloader, NovelDownloaderMulti, NovelDownloaderGev
+from SpiNovel import NovelDownloaderGev
 
 ##############################################
 #------------------常量定义------------------#
@@ -27,7 +27,7 @@ EOL = u'\n'
 ##############################################
 #------------------类定义--------------------#
 ##############################################
-class NovelDownloader_QuYueGe(NovelDownloader):
+class NovelDownloader_QuYueGe(NovelDownloaderGev):
 
     def GetNovelListDispatch(self, soup):
         '''
@@ -69,16 +69,6 @@ class NovelDownloader_QuYueGe(NovelDownloader):
 
         return title, text
 
-    def NovelUrlComb(self, novelUrl):
-        return self.webPageUrl + novelUrl
-
-class NovelDownloader_QuYueGeMulti(NovelDownloaderMulti,NovelDownloader_QuYueGe):
-    pass
-
-class NovelDownloader_QuYueGeGev(NovelDownloaderGev,NovelDownloader_QuYueGe):
-    pass
-
-
 ##############################################
 #------------------脚本开始------------------#
 ##############################################
@@ -99,5 +89,5 @@ if __name__ == '__main__':
     if startChap < 1:
         raise ValueError("startChap must larger than 1")
 
-    novelDL = NovelDownloader_QuYueGeGev(webPageUrl)
+    novelDL = NovelDownloader_QuYueGe(webPageUrl)
     novelDL.GetNovel(startChap)

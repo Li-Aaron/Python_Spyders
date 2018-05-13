@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
 '''
-程序名称 NovelGeDownloader--www.23us.la
+程序名称 NovelGeDownloader--www.yixuanju.com
 @Author: AC
-2017-12-25
+20118-5-13
 '''
 __author__ = 'AC'
 
 ##############################################
 #------------------import--------------------#
-############################################## 
+##############################################
 import re
 import sys
-from SpiNovel import NovelDownloader, NovelDownloaderMulti, NovelDownloaderGev
+from SpiNovel import NovelDownloaderGev
 
 ##############################################
 #------------------常量定义------------------#
 ##############################################
-# URL = 'http://www.quyuege.com/xs/43/43176/'
-URL = 'https://www.23us.la/html/247/247068/'
-# URL = 'https://www.23us.la/html/151/151769/'
+URL = 'http://www.yixuanju.com/book/16111'
 EOL = u'\n'
 
 ##############################################
@@ -29,27 +27,27 @@ EOL = u'\n'
 ##############################################
 #------------------类定义--------------------#
 ##############################################
-class NovelDownloader_23us(NovelDownloader):
+class NovelDownloader_Yixuanju(NovelDownloaderGev):
 
-    rootUrl = 'https://www.23us.la'
+    rootUrl = 'http://www.yixuanju.com'
 
     def GetNovelListDispatch(self, soup):
         '''
-        Get Novel List (QuYueGe Version)
+        Get Novel List (BiQuWu Version)
         :param soup: soup of html string lxml
         :return: novel : key('Title','Author','Abstract','UrlList')
         '''
         novel = {}
         novelUrlList = []
         # novel title and properties
-        novelProperties = soup.find_all('div', class_="btitle")[0]
-        novel['Title'] = novelProperties.find_all('h1')[0].string
-        novel['Author'] = novelProperties.find_all('em')[0].string
-        novelProperties = soup.find_all('p', class_="intro")[0]
-        novel['Abstract'] = novelProperties.find_all('b')[0].string
+        novelProperties = soup.find_all('header', class_="book-info-main")[0]
+        novel['Title'] = novelProperties.find_all('h2')[0].string
+        novel['Author'] = novelProperties.find_all('div')[0].string
+        novelProperties = soup.find_all('div', class_="am-u-sm-9")[0]
+        novel['Abstract'] = novelProperties.find_all('div')[0].string
 
         # novel url list
-        novelList = soup.find_all('dl', class_="chapterlist")[0]
+        novelList = soup.find_all('ul', "am-list am-list-static")[0]
         for novelUrl in novelList.find_all('a'):
             novelUrlList.append(novelUrl['href'])
         novel['UrlList'] = novelUrlList
@@ -57,29 +55,20 @@ class NovelDownloader_23us(NovelDownloader):
 
     def GetNovelTextDispatch(self, soup):
         '''
-        Get Novel Text (QuYueGe Version)
+        Get Novel Text (BiQuWu Version)
         :param soup: soup of html string lxml
         :return: title, text
         '''
         # find novel title
-        novelTitle = soup.find_all('div', class_="inner", id="BookCon")[0]
-        title = novelTitle.find_all('h1')[0].string
+        bookContent = soup.find_all('header', class_="am-banner")[0]
+        title = bookContent.find_all('h1')[0].string
+
         # find novel text
-        matchObj = re.search(u'<div id="content".*?>\s*(.*?)</div>', unicode(novelTitle), re.M | re.S)
-        if not matchObj:
-            text = ''
-        else:
-            text = matchObj.group(1)
+        novelText = soup.find_all('article', id="cha-content")[0]
+        text = novelText.text
+
         return title, text
 
-    def NovelUrlComb(self, novelUrl):
-        return self.rootUrl + novelUrl
-
-class NovelDownloader_23usMulti(NovelDownloaderMulti,NovelDownloader_23us):
-    pass
-
-class NovelDownloader_23usGev(NovelDownloaderGev,NovelDownloader_23us):
-    pass
 
 
 ##############################################
@@ -102,5 +91,5 @@ if __name__ == '__main__':
     if startChap < 1:
         raise ValueError("startChap must larger than 1")
 
-    novelDL = NovelDownloader_23usGev(webPageUrl)
+    novelDL = NovelDownloader_Yixuanju(webPageUrl)
     novelDL.GetNovel(startChap)

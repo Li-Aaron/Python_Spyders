@@ -100,6 +100,7 @@ class NovelDownloaderMulti(NovelDownloader):
         DownLoad Text Start (using Multitask)
         :return:
         '''
+        self.startChap = startChap
         self.GetNovelList()
         print self.novel['Title']
         # get novel
