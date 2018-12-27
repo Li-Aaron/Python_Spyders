@@ -19,6 +19,13 @@ import MySQLdb
 ##############################################
 #------------------函数定义------------------#
 ##############################################
+def load_mysql_info(filename):
+    with open(filename) as f:
+        host     = f.readline().replace('\n', '')
+        port     = int(f.readline().replace('\n', ''))
+        username = f.readline().replace('\n', '')
+        password = f.readline().replace('\n', '')
+    return host, port, username, password
 
 ##############################################
 #------------------类定义--------------------#
@@ -30,7 +37,8 @@ import MySQLdb
 if __name__ == '__main__':
     # 主线程
     # connection object
-    con = MySQLdb.connect(host='localhost',port=3306,user='AC',passwd='139849e7b513a738',db='test',charset='gbk') # 文件中创建
+    host, port, user, passwd = load_mysql_info('setting.txt')
+    con = MySQLdb.connect(host=host,port=port,user=user,passwd=passwd,db='test',charset='gbk') # 文件中创建
     # con = sqlite3.connect(':memory:') # 内存中创建
 
     # cursor object using to query
